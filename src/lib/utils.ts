@@ -20,32 +20,6 @@ export function toUsd(
   return rates ? amount * rates[currency] : null;
 }
 
-/** One entered amount, expressed in every currency a link record stores. */
-export function convertAmount(
-  amount: number,
-  currency: "USD" | "SUI" | "LOFI",
-  rates: Rates
-): { amountUsd: number; amountSui: number; amountLofi: number } {
-  const usd = currency === "USD" ? amount : amount * rates[currency];
-  return {
-    amountUsd: currency === "USD" ? amount : parseFloat(usd.toFixed(6)),
-    amountSui: currency === "SUI" ? amount : usdToToken(usd, rates.SUI),
-    amountLofi: currency === "LOFI" ? amount : usdToToken(usd, rates.LOFI),
-  };
-}
-
-/** The amount in the currency the sender entered. */
-export function entryAmount(link: {
-  amountUsd: number;
-  amountSui: number;
-  amountLofi: number;
-  currency: "USD" | "SUI" | "LOFI";
-}): number {
-  if (link.currency === "SUI") return link.amountSui;
-  if (link.currency === "LOFI") return link.amountLofi;
-  return link.amountUsd;
-}
-
 export function formatCurrency(amount: number, currency: 'USD' | 'SUI' | 'LOFI' = 'USD'): string {
   if (currency === 'USD') {
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -64,7 +38,7 @@ export function formatRate(token: "SUI" | "LOFI", rate: number): string {
 
 export function maskAddress(address: string): string {
   if (!address || address.length < 10) return address;
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
 export function formatTimeRemaining(expiresAt: number): string {

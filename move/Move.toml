@@ -1,9 +1,8 @@
 [package]
-name = "Floe"
-edition = "2024.beta"
+name = "floe"
+edition = "2024"
 
-[dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+# The Sui framework is an implicit dependency in current Sui CLI versions.
 
 [addresses]
 floe = "0x0"

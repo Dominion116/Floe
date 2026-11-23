@@ -1,9 +1,11 @@
+"use client";
+
 import { Droplet } from "lucide-react";
-import { LiveValue } from "@/components/ui/LiveValue";
 import { ThemeIcon } from "@/components/ui/ThemeIcon";
 import { CARD_THEMES } from "@/lib/themes";
 import { CardThemeId } from "@/lib/types";
-import { cn, formatCurrency } from "@/lib/utils";
+import { usePrices } from "@/lib/usePrices";
+import { cn, formatCurrency, toUsd } from "@/lib/utils";
 
 interface EnvelopeCardProps {
   /** In `currency` */
@@ -26,6 +28,9 @@ export function EnvelopeCard({
   compact = false,
 }: EnvelopeCardProps) {
   const theme = CARD_THEMES[themeId] || CARD_THEMES.glacial;
+  const { rates } = usePrices(currency !== "USD");
+  // Dollars lead. The token amount is the exact one, so it always shows too.
+  const usd = currency === "USD" ? null : toUsd(amount, currency, rates);
 
   return (
     <div
@@ -48,12 +53,12 @@ export function EnvelopeCard({
           compact ? "my-3 text-4xl" : "my-5 text-5xl sm:text-6xl"
         )}
       >
-        {formatCurrency(amount, currency)}
+        {usd === null ? formatCurrency(amount, currency) : formatCurrency(usd)}
       </p>
 
-      {currency !== "USD" && (
+      {usd !== null && (
         <p className="-mt-2 mb-4 text-sm tabular-nums text-ink/75">
-          <LiveValue amount={amount} currency={currency} />
+          {formatCurrency(amount, currency)} at the live price
         </p>
       )}
 

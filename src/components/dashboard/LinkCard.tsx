@@ -3,8 +3,10 @@
 import type { ReactNode } from "react";
 import { Droplet, ExternalLink } from "lucide-react";
 import { LiveValue } from "@/components/ui/LiveValue";
-import { PaymentLinkRecord } from "@/lib/types";
-import { cn, entryAmount, formatCurrency, formatTimeRemaining } from "@/lib/utils";
+import { explorerAccountUrl, explorerTxUrl } from "@/lib/chain/config";
+import { fromUnits } from "@/lib/chain/escrow";
+import type { PaymentLinkRecord } from "@/lib/types";
+import { cn, formatCurrency, formatTimeRemaining, maskAddress } from "@/lib/utils";
 
 interface LinkCardProps {
   link: PaymentLinkRecord;
@@ -12,6 +14,7 @@ interface LinkCardProps {
 }
 
 const STATUS = {
+  creating: { label: "Confirming", className: "bg-mist-light text-ink-muted" },
   pending: { label: "Pending", className: "bg-warning-fill text-warning" },
   claimed: { label: "Claimed", className: "bg-success-fill text-success" },
   expired: { label: "Expired", className: "bg-mist-light text-ink-muted" },
@@ -32,34 +35,56 @@ const formatDateTime = (ms: number) =>
 
 export function LinkCard({ link, onClawbackClick }: LinkCardProps) {
   const status = STATUS[link.status];
+  const held = fromUnits(link.amountUnits);
+  const isOpen = link.status === "pending" || link.status === "expired";
 
-  const details: { label: string; value: ReactNode }[] = [{ label: "Created", value: formatDate(link.createdAt) }];
-  if (link.currency !== "USD") {
-    details.unshift({
-      label: "Value now",
-      value: <LiveValue amount={entryAmount(link)} currency={link.currency} />,
-    });
+  const details: { label: string; value: ReactNode }[] = [];
+  if (link.currency === "USD") {
+    details.push({ label: "Sent as", value: formatCurrency(link.enteredAmount) });
   }
+  if (isOpen) {
+    details.push({ label: "Value now", value: <LiveValue amount={held} currency={link.token} /> });
+  }
+  details.push({ label: "Created", value: formatDate(link.createdAt) });
   if (link.status === "pending") {
     details.push({ label: "Expires", value: formatTimeRemaining(link.expiresAt) });
   }
-  if (link.status === "claimed") {
-    if (link.claimedAt) details.push({ label: "Claimed", value: formatDateTime(link.claimedAt) });
-    if (link.claimedByMasked) details.push({ label: "Claimed by", value: link.claimedByMasked });
-  }
   if (link.status === "expired") {
     details.push({ label: "Expired", value: formatDate(link.expiresAt) });
+  }
+  if (link.status === "claimed" && link.closedAt) {
+    details.push({ label: "Claimed", value: formatDateTime(link.closedAt) });
+  }
+  if (link.status === "reclaimed" && link.closedAt) {
+    details.push({ label: "Refunded", value: formatDateTime(link.closedAt) });
+  }
+  if (link.claimedBy) {
+    details.push({
+      label: "Claimed by",
+      value: (
+        <a
+          href={explorerAccountUrl(link.claimedBy)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link font-mono text-[13px]"
+        >
+          {maskAddress(link.claimedBy)}
+        </a>
+      ),
+    });
   }
 
   return (
     <article className="card flex min-w-0 flex-col p-5">
       <div className="flex items-start justify-between gap-3">
         <h2 className="type-figure min-w-0 text-3xl [overflow-wrap:anywhere]">
-          {formatCurrency(entryAmount(link), link.currency)}
+          {formatCurrency(held, link.token)}
         </h2>
         <span className={cn("badge shrink-0", status.className)}>{status.label}</span>
       </div>
-      <p className="mt-2 text-base text-ink [overflow-wrap:anywhere]">{link.recipientNote}</p>
+      {link.recipientNote && (
+        <p className="mt-2 text-base text-ink [overflow-wrap:anywhere]">{link.recipientNote}</p>
+      )}
       {link.hasWaterDonation && (
         <p className="type-help mt-1 flex items-center gap-1.5">
           <Droplet className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -77,11 +102,12 @@ export function LinkCard({ link, onClawbackClick }: LinkCardProps) {
       </dl>
 
       <div className="mt-auto pt-5">
-        {link.status === "pending" && (
+        {isOpen && (
           <>
             <p className="type-help mb-3">
-              Floe doesn’t keep the private link. If you lost it, refund this one and create
-              another.
+              {link.status === "expired"
+                ? "Nobody claimed this in time. Refund it to get the money back."
+                : "Floe doesn’t keep the private link. If you lost it, refund this one and create another."}
             </p>
             <button
               type="button"
@@ -93,24 +119,22 @@ export function LinkCard({ link, onClawbackClick }: LinkCardProps) {
           </>
         )}
 
-        {link.status === "claimed" && (
+        {link.status === "creating" && (
+          <p className="type-help">
+            Waiting for Sui to confirm this payment. It disappears if it was never sent.
+          </p>
+        )}
+
+        {(link.status === "claimed" || link.status === "reclaimed") && (
           <a
-            href={`/claim?id=${encodeURIComponent(link.id)}`}
+            href={explorerTxUrl(link.digest)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-sm btn-secondary w-full"
           >
-            <span>View claim page</span>
+            <span>View payment on explorer</span>
             <ExternalLink aria-hidden="true" />
           </a>
-        )}
-
-        {(link.status === "expired" || link.status === "reclaimed") && (
-          <p className="type-help">
-            {link.status === "reclaimed"
-              ? "Refunded to your wallet."
-              : "Not claimed before the link expired."}
-          </p>
         )}
       </div>
     </article>

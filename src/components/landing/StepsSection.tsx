@@ -62,7 +62,7 @@ const STEPS = [
   },
   {
     title: "Claim",
-    body: "Your friend logs in with Google or Apple. Done.",
+    body: "Your friend logs in with Google. Done.",
     moment: <ClaimMoment />,
   },
 ];

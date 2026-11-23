@@ -1,190 +1,179 @@
-module floe::escrow {
-    use sui::coin::{Self, Coin};
-    use sui::balance::{Self, Balance};
-    use sui::clock::{Self, Clock};
-    use sui::event;
-    use sui::ed25519;
-    use sui::bcs;
+module floe::escrow;
 
-    /// Error codes
-    const EInvalidSignature: u64 = 0;
-    const EEscrowExpired: u64 = 1;
-    const EEscrowNotExpired: u64 = 2;
-    const EUnauthorized: u64 = 3;
-    const EInsufficientBalance: u64 = 4;
+use sui::balance::{Self, Balance};
+use sui::bcs;
+use sui::clock::Clock;
+use sui::coin::{Self, Coin};
+use sui::ed25519;
+use sui::event;
 
-    /// Verified Lofi Foundation Clean Water Treasury Address
-    const CLEAN_WATER_TREASURY: address = @0x10f1c1ea00000000000000000000000000000000000000000000000000000000;
+/// Error codes
+const EInvalidSignature: u64 = 0;
+const EEscrowExpired: u64 = 1;
+const EUnauthorized: u64 = 3;
+const EInsufficientBalance: u64 = 4;
+const EInvalidPublicKey: u64 = 5;
+const EInvalidDuration: u64 = 6;
 
-    /// The Shared Escrow Object holding the deposited funds
-    public struct PaymentEscrow<phantom T> has key, store {
-        id: UID,
-        balance: Balance<T>,
-        sender: address,
-        ephemeral_pubkey: vector<u8>, // Ed25519 public key (32 bytes)
-        expires_at_ms: u64,
-        water_donation: Balance<T>,
-        theme_id: u8,
-    }
+const ED25519_PUBLIC_KEY_LENGTH: u64 = 32;
+/// 365 days. Keeps `now + duration_ms` far from overflow.
+const MAX_DURATION_MS: u64 = 31_536_000_000;
 
-    /// Events
-    public struct EscrowCreated has copy, drop {
-        escrow_id: ID,
-        sender: address,
-        amount: u64,
-        water_donation: u64,
-        theme_id: u8,
-    }
+/// Lofi Foundation treasury, as published in the code of donate.lofifoundation.com.
+const CLEAN_WATER_TREASURY: address =
+    @0xb1a99b2135e594ed62506352a79362a146dda11398cacb187cb42533b66ce69c;
 
-    public struct EscrowClaimed has copy, drop {
-        escrow_id: ID,
-        recipient: address,
-        amount: u64,
-        water_donation: u64,
-    }
+/// Shared object holding the deposited funds until they are claimed or reclaimed.
+public struct PaymentEscrow<phantom T> has key {
+    id: UID,
+    balance: Balance<T>,
+    sender: address,
+    ephemeral_pubkey: vector<u8>, // Ed25519 public key (32 bytes)
+    expires_at_ms: u64,
+    water_donation: Balance<T>,
+    theme_id: u8,
+}
 
-    public struct EscrowReclaimed has copy, drop {
-        escrow_id: ID,
-        sender: address,
-        amount: u64,
-    }
+/// Events
+public struct EscrowCreated has copy, drop {
+    escrow_id: ID,
+    sender: address,
+    amount: u64,
+    water_donation: u64,
+    theme_id: u8,
+}
 
-    /// Entry 1: Create Escrow
-    public entry fun create_escrow<T>(
-        mut coin: Coin<T>,
-        ephem_pubkey: vector<u8>,
-        duration_ms: u64,
-        water_cut: u64,
-        theme_id: u8,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        let total_val = coin::value(&coin);
-        assert!(total_val > water_cut, EInsufficientBalance);
+public struct EscrowClaimed has copy, drop {
+    escrow_id: ID,
+    recipient: address,
+    amount: u64,
+    water_donation: u64,
+}
 
-        let sender = tx_context::sender(ctx);
-        let now = clock::timestamp_ms(clock);
-        let expires_at_ms = now + duration_ms;
+public struct EscrowReclaimed has copy, drop {
+    escrow_id: ID,
+    sender: address,
+    amount: u64,
+}
 
-        let mut water_donation_balance = balance::zero<T>();
-        if (water_cut > 0) {
-            let water_coin = coin::split(&mut coin, water_cut, ctx);
-            balance::join(&mut water_donation_balance, coin::into_balance(water_coin));
-        };
+/// Locks `coin` so that only the holder of the link's private key can direct it.
+/// `water_cut` is set aside for the treasury and is included in `coin`.
+public fun create_escrow<T>(
+    mut coin: Coin<T>,
+    ephem_pubkey: vector<u8>,
+    duration_ms: u64,
+    water_cut: u64,
+    theme_id: u8,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    assert!(coin.value() > water_cut, EInsufficientBalance);
+    assert!(ephem_pubkey.length() == ED25519_PUBLIC_KEY_LENGTH, EInvalidPublicKey);
+    assert!(duration_ms > 0 && duration_ms <= MAX_DURATION_MS, EInvalidDuration);
 
-        let principal_balance = coin::into_balance(coin);
-        let principal_amount = balance::value(&principal_balance);
+    let water_donation = coin.split(water_cut, ctx).into_balance();
+    let balance = coin.into_balance();
+    let amount = balance.value();
+    let sender = ctx.sender();
 
-        let escrow = PaymentEscrow<T> {
-            id: object::new(ctx),
-            balance: principal_balance,
-            sender,
-            ephemeral_pubkey: ephem_pubkey,
-            expires_at_ms,
-            water_donation: water_donation_balance,
-            theme_id,
-        };
+    let escrow = PaymentEscrow<T> {
+        id: object::new(ctx),
+        balance,
+        sender,
+        ephemeral_pubkey: ephem_pubkey,
+        expires_at_ms: clock.timestamp_ms() + duration_ms,
+        water_donation,
+        theme_id,
+    };
 
-        let escrow_id = object::id(&escrow);
-        event::emit(EscrowCreated {
-            escrow_id,
-            sender,
-            amount: principal_amount,
-            water_donation: water_cut,
-            theme_id,
-        });
+    event::emit(EscrowCreated {
+        escrow_id: object::id(&escrow),
+        sender,
+        amount,
+        water_donation: water_cut,
+        theme_id,
+    });
 
-        transfer::share_object(escrow);
-    }
+    transfer::share_object(escrow);
+}
 
-    /// Entry 2: Claim Escrow
-    /// Verifies ephemeral keypair signature over recipient's address bytes
-    public entry fun claim_escrow<T>(
-        escrow: PaymentEscrow<T>,
-        signature: vector<u8>,
-        recipient: address,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        let now = clock::timestamp_ms(clock);
-        assert!(now <= escrow.expires_at_ms, EEscrowExpired);
+/// Pays `recipient`. Anyone may submit this, because `signature` is made with the
+/// link's private key over this escrow's ID and the recipient, so a copied
+/// signature can't be redirected to another address or replayed on another escrow.
+public fun claim_escrow<T>(
+    escrow: PaymentEscrow<T>,
+    signature: vector<u8>,
+    recipient: address,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    assert!(clock.timestamp_ms() <= escrow.expires_at_ms, EEscrowExpired);
 
-        // Verification: recipient address is signed by ephemeral secret key
-        let msg = bcs::to_bytes(&recipient);
-        let is_valid = ed25519::ed25519_verify(&signature, &escrow.ephemeral_pubkey, &msg);
-        assert!(is_valid, EInvalidSignature);
+    let msg = claim_message(object::id(&escrow), recipient);
+    assert!(
+        ed25519::ed25519_verify(&signature, &escrow.ephemeral_pubkey, &msg),
+        EInvalidSignature,
+    );
 
-        let PaymentEscrow {
-            id,
-            balance,
-            sender: _,
-            ephemeral_pubkey: _,
-            expires_at_ms: _,
-            water_donation,
-            theme_id: _,
-        } = escrow;
+    pay_out(escrow, recipient, ctx);
+}
 
-        let escrow_id = object::uid_to_inner(&id);
-        object::delete(id);
+/// Returns everything, including the unspent donation, to the sender. Allowed at
+/// any time while the escrow is unclaimed, before or after it expires.
+public fun reclaim_escrow<T>(escrow: PaymentEscrow<T>, ctx: &mut TxContext) {
+    let sender = ctx.sender();
+    assert!(sender == escrow.sender, EUnauthorized);
 
-        let claim_amount = balance::value(&balance);
-        let water_amount = balance::value(&water_donation);
+    let PaymentEscrow { id, mut balance, water_donation, .. } = escrow;
+    let escrow_id = id.to_inner();
+    id.delete();
 
-        // Transfer funds to recipient
-        let payout_coin = coin::from_balance(balance, ctx);
-        transfer::public_transfer(payout_coin, recipient);
+    balance.join(water_donation);
+    let amount = balance.value();
+    transfer::public_transfer(coin::from_balance(balance, ctx), sender);
 
-        // Route clean water donation if any
-        if (water_amount > 0) {
-            let water_coin = coin::from_balance(water_donation, ctx);
-            transfer::public_transfer(water_coin, CLEAN_WATER_TREASURY);
-        } else {
-            balance::destroy_zero(water_donation);
-        };
+    event::emit(EscrowReclaimed { escrow_id, sender, amount });
+}
 
-        event::emit(EscrowClaimed {
-            escrow_id,
-            recipient,
-            amount: claim_amount,
-            water_donation: water_amount,
-        });
-    }
+/// The bytes the link's private key signs: escrow ID followed by recipient.
+fun claim_message(escrow_id: ID, recipient: address): vector<u8> {
+    let mut msg = bcs::to_bytes(&escrow_id);
+    msg.append(bcs::to_bytes(&recipient));
+    msg
+}
 
-    /// Entry 3: Reclaim Escrow (Sender clawback after expiry)
-    public entry fun reclaim_escrow<T>(
-        escrow: PaymentEscrow<T>,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        let sender = tx_context::sender(ctx);
-        assert!(sender == escrow.sender, EUnauthorized);
+fun pay_out<T>(escrow: PaymentEscrow<T>, recipient: address, ctx: &mut TxContext) {
+    let PaymentEscrow { id, balance, water_donation, .. } = escrow;
+    let escrow_id = id.to_inner();
+    id.delete();
 
-        let now = clock::timestamp_ms(clock);
-        assert!(now >= escrow.expires_at_ms, EEscrowNotExpired);
+    let amount = balance.value();
+    let water_amount = water_donation.value();
 
-        let PaymentEscrow {
-            id,
-            mut balance,
-            sender: _,
-            ephemeral_pubkey: _,
-            expires_at_ms: _,
-            water_donation,
-            theme_id: _,
-        } = escrow;
+    transfer::public_transfer(coin::from_balance(balance, ctx), recipient);
 
-        let escrow_id = object::uid_to_inner(&id);
-        object::delete(id);
+    if (water_amount > 0) {
+        transfer::public_transfer(coin::from_balance(water_donation, ctx), CLEAN_WATER_TREASURY);
+    } else {
+        balance::destroy_zero(water_donation);
+    };
 
-        balance::join(&mut balance, water_donation);
-        let refund_amount = balance::value(&balance);
+    event::emit(EscrowClaimed { escrow_id, recipient, amount, water_donation: water_amount });
+}
 
-        let refund_coin = coin::from_balance(balance, ctx);
-        transfer::public_transfer(refund_coin, sender);
+#[test_only]
+public fun treasury_for_testing(): address { CLEAN_WATER_TREASURY }
 
-        event::emit(EscrowReclaimed {
-            escrow_id,
-            sender,
-            amount: refund_amount,
-        });
-    }
+#[test_only]
+public fun pay_out_for_testing<T>(
+    escrow: PaymentEscrow<T>,
+    recipient: address,
+    ctx: &mut TxContext,
+) {
+    pay_out(escrow, recipient, ctx)
+}
+
+#[test_only]
+public fun claim_message_for_testing(escrow_id: ID, recipient: address): vector<u8> {
+    claim_message(escrow_id, recipient)
 }
