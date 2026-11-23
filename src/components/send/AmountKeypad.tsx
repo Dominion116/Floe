@@ -1,18 +1,28 @@
 "use client";
 
 import { Delete } from "lucide-react";
-import { usdToSui } from "@/lib/utils";
+import { cn, formatCurrency, toUsd, usdToSui } from "@/lib/utils";
 
 interface AmountKeypadProps {
   amountStr: string;
   currency: "USD" | "SUI" | "LOFI";
+  error?: string | null;
   onChangeAmount: (val: string) => void;
   onToggleCurrency: (curr: "USD" | "SUI" | "LOFI") => void;
 }
 
+const CURRENCIES = [
+  { id: "USD", label: "USD" },
+  { id: "SUI", label: "SUI" },
+  { id: "LOFI", label: "$LOFI" },
+] as const;
+
+const PRESETS = [5, 20, 50];
+
 export function AmountKeypad({
   amountStr,
   currency,
+  error,
   onChangeAmount,
   onToggleCurrency,
 }: AmountKeypadProps) {
@@ -40,76 +50,105 @@ export function AmountKeypad({
     }
   };
 
-  const handlePreset = (preset: number) => {
-    onChangeAmount(preset.toString());
+  // Hardware keyboards and paste. inputMode="none" keeps the phone keyboard closed.
+  const handleTyped = (raw: string) => {
+    const cleaned = raw.replace(/[^\d.]/g, "").replace(/^0+(?=\d)/, "");
+    if (cleaned === "") {
+      onChangeAmount("0");
+    } else if (cleaned.length <= 7 && /^\d*(\.\d{0,2})?$/.test(cleaned)) {
+      onChangeAmount(cleaned.startsWith(".") ? `0${cleaned}` : cleaned);
+    }
   };
 
-  const numericValue = parseFloat(amountStr) || 0;
-  const suiValue = usdToSui(numericValue);
+  const usdValue = toUsd(parseFloat(amountStr) || 0, currency);
+  const keyClass =
+    "h-12 rounded-2xl bg-snow hover:bg-mist-light active:bg-mist-light text-xl text-ink tabular-nums flex items-center justify-center transition-colors duration-150";
 
   return (
-    <div className="space-y-6">
-      {/* Display & Currency Toggle */}
-      <div className="text-center space-y-2">
-        <div
-          role="radiogroup"
-          aria-label="Select Currency"
-          className="inline-flex p-1 rounded-full bg-snow border border-mist/40 text-xs font-mono"
+    <div className="space-y-5">
+      <fieldset>
+        <legend className="sr-only">Currency</legend>
+        <div className="mx-auto grid w-full max-w-[17.5rem] grid-cols-3 gap-1 rounded-full bg-mist-light p-1">
+          {CURRENCIES.map(({ id, label }) => (
+            <label
+              key={id}
+              className={cn(
+                "flex min-h-[40px] cursor-pointer items-center justify-center rounded-full text-sm font-medium transition-colors duration-150 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink",
+                currency === id ? "bg-white text-ink" : "text-ink-muted hover:text-ink"
+              )}
+            >
+              <input
+                type="radio"
+                name="currency"
+                value={id}
+                checked={currency === id}
+                onChange={() => onToggleCurrency(id)}
+                className="sr-only"
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <div className="text-center">
+        <label htmlFor="transfer-amount" className="sr-only">
+          Amount in {currency}
+        </label>
+        <div className="type-figure flex items-baseline justify-center text-6xl sm:text-7xl">
+          {currency === "USD" && (
+            <span className="text-ink-muted" aria-hidden="true">
+              $
+            </span>
+          )}
+          <input
+            id="transfer-amount"
+            type="text"
+            inputMode="none"
+            autoComplete="off"
+            value={amountStr}
+            onChange={(e) => handleTyped(e.target.value)}
+            aria-invalid={!!error}
+            aria-describedby="transfer-amount-help"
+            style={{ width: `${amountStr.length + 0.25}ch` }}
+            className="min-w-0 rounded-lg bg-transparent text-center tabular-nums focus-visible:outline-offset-4"
+          />
+          {currency !== "USD" && (
+            <span className="ml-2 font-sans text-xl tracking-normal text-ink-muted" aria-hidden="true">
+              {currency}
+            </span>
+          )}
+        </div>
+        <p
+          id="transfer-amount-help"
+          role={error ? "alert" : undefined}
+          className={cn("mt-2 text-sm tabular-nums", error ? "text-danger" : "text-ink-muted")}
         >
-          {(["USD", "SUI", "LOFI"] as const).map((curr) => (
-            <button
-              key={curr}
-              type="button"
-              role="radio"
-              aria-checked={currency === curr}
-              onClick={() => onToggleCurrency(curr)}
-              className={`px-3.5 py-1.5 rounded-full transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
-                currency === curr
-                  ? "bg-ink text-white shadow-xs font-semibold"
-                  : "text-ink-muted hover:text-ink"
-              }`}
-            >
-              {curr}
-            </button>
-          ))}
-        </div>
-
-        {/* Large Amount Display */}
-        <div className="py-4">
-          <div className="flex items-center justify-center font-serif text-6xl sm:text-7xl font-light text-ink tracking-[-0.03em]">
-            {currency === "USD" && <span className="text-ink-muted mr-1">$</span>}
-            <span>{amountStr}</span>
-            {currency !== "USD" && (
-              <span className="text-xl sm:text-2xl font-sans text-ink-muted ml-2">
-                {currency}
-              </span>
-            )}
-          </div>
-          <p className="text-xs font-mono text-ink-muted mt-2">
-            ≈ {suiValue} SUI · Instant settlement on Sui
-          </p>
-        </div>
-
-        {/* Quick Presets */}
-        <div className="flex items-center justify-center gap-2">
-          {[5, 10, 25, 50].map((val) => (
-            <button
-              key={val}
-              type="button"
-              onClick={() => handlePreset(val)}
-              className="px-4 py-1.5 rounded-full text-xs font-mono bg-white border border-mist/50 text-ink hover:border-ink hover:bg-snow transition-all active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink min-h-[36px]"
-            >
-              ${val}
-            </button>
-          ))}
-        </div>
+          {error ??
+            (currency === "USD"
+              ? `About ${usdToSui(usdValue)} SUI`
+              : `About ${formatCurrency(usdValue)}`)}
+        </p>
       </div>
 
-      {/* Numeric Keypad Grid */}
+      <div className="flex justify-center gap-2" role="group" aria-label="Quick amounts">
+        {PRESETS.map((val) => (
+          <button
+            key={val}
+            type="button"
+            aria-pressed={amountStr === String(val)}
+            onClick={() => onChangeAmount(String(val))}
+            className="btn btn-sm btn-secondary tabular-nums aria-pressed:border-ink"
+          >
+            {currency === "USD" ? `$${val}` : `${val} ${currency}`}
+          </button>
+        ))}
+      </div>
+
       <div
         role="group"
         aria-label="Numeric keypad"
-        className="grid grid-cols-3 gap-2.5 max-w-[280px] mx-auto pt-2"
+        className="mx-auto grid max-w-[20rem] grid-cols-3 gap-2"
       >
         {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"].map((digit) => (
           <button
@@ -117,18 +156,13 @@ export function AmountKeypad({
             type="button"
             onClick={() => handleDigit(digit)}
             aria-label={digit === "." ? "Decimal point" : `Digit ${digit}`}
-            className="h-14 rounded-2xl bg-white border border-mist/40 hover:border-mist hover:bg-snow font-mono text-xl text-ink font-medium transition-all active:scale-[0.96] shadow-2xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className={keyClass}
           >
             {digit}
           </button>
         ))}
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="h-14 rounded-2xl bg-white border border-mist/40 hover:border-mist hover:bg-snow flex items-center justify-center text-ink transition-all active:scale-[0.96] shadow-2xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-          aria-label="Backspace"
-        >
-          <Delete className="w-5 h-5 text-ink-muted" aria-hidden="true" />
+        <button type="button" onClick={handleDelete} className={keyClass} aria-label="Delete last digit">
+          <Delete className="h-5 w-5 text-ink-muted" aria-hidden="true" />
         </button>
       </div>
     </div>

@@ -4,9 +4,8 @@ export interface CardTheme {
   id: CardThemeId;
   name: string;
   subtitle: string;
-  bgGradient: string;
-  badgeBg: string;
-  accentColor: string;
+  surfaceClass: string;
+  accentClass: string;
   iconName: string;
 }
 

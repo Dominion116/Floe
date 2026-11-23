@@ -1,24 +1,34 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { LinkCard } from "@/components/dashboard/LinkCard";
+import { Plus } from "lucide-react";
+import { PageShell } from "@/components/PageShell";
+import { CreateLinkButton, useCreateLink } from "@/components/create/CreateLinkProvider";
 import { ClawbackModal } from "@/components/dashboard/ClawbackModal";
+import { LinkCard } from "@/components/dashboard/LinkCard";
+import { StatCard } from "@/components/ui/StatCard";
 import { getStoredLinks, updateLinkStatus } from "@/lib/storage";
 import { PaymentLinkRecord, EscrowStatus } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
-import Link from "next/link";
-import { Plus, Droplets, Clock, CheckCircle2, Layers, ArrowUpRight } from "lucide-react";
+import { cn, formatCurrency } from "@/lib/utils";
+
+const EMPTY_COPY: Record<"all" | EscrowStatus, string> = {
+  all: "You haven’t created a link yet",
+  pending: "No links are waiting to be claimed",
+  claimed: "None of your links have been claimed yet",
+  expired: "None of your links have expired",
+  reclaimed: "You haven’t refunded any links",
+};
 
 export default function DashboardPage() {
+  const { createdCount } = useCreateLink();
   const [links, setLinks] = useState<PaymentLinkRecord[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | EscrowStatus>("all");
   const [clawbackLink, setClawbackLink] = useState<PaymentLinkRecord | null>(null);
 
+  // Reloads when the create modal saves a link on top of this page.
   useEffect(() => {
     setLinks(getStoredLinks());
-  }, []);
+  }, [createdCount]);
 
   const handleConfirmClawback = (id: string) => {
     updateLinkStatus(id, "reclaimed");
@@ -37,162 +47,99 @@ export default function DashboardPage() {
   const waterFundedGallons =
     links.filter((l) => l.hasWaterDonation).length * 10;
 
+  const tabs: { id: "all" | EscrowStatus; label: string; count: number }[] = [
+    { id: "all", label: "All", count: links.length },
+    { id: "pending", label: "Pending", count: pendingCount },
+    { id: "claimed", label: "Claimed", count: claimedCount },
+    {
+      id: "expired",
+      label: "Expired",
+      count: links.filter((l) => l.status === "expired" || l.status === "reclaimed").length,
+    },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <Navbar />
+    <PageShell>
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="type-headline">Your payment links</h1>
+          <p className="type-lede mt-2">See who has claimed, and refund anything unclaimed.</p>
+        </div>
+        <CreateLinkButton className="btn btn-primary shrink-0">
+          <Plus aria-hidden="true" />
+          <span>Create a payment link</span>
+        </CreateLinkButton>
+      </div>
 
-      <main className="flex-1 py-10 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto space-y-8 sm:space-y-10">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mist-light text-ink text-xs font-mono uppercase tracking-wider mb-2">
-                <Layers className="w-3.5 h-3.5 text-frost-dark" aria-hidden="true" />
-                <span>Sender Activity</span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-light text-ink tracking-[-0.03em]">
-                Payment Links Dashboard
-              </h1>
-              <p className="text-sm sm:text-base text-ink-muted leading-relaxed font-normal mt-1">
-                Track your active escrow links, monitor claim status, and reclaim funds.
-              </p>
-            </div>
+      <dl className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:mt-10 lg:grid-cols-4">
+        <StatCard
+          label="Total sent"
+          value={formatCurrency(totalVolumeUsd, "USD")}
+          note={`${links.length} ${links.length === 1 ? "link" : "links"}`}
+        />
+        <StatCard label="Pending" value={String(pendingCount)} note="Waiting to be claimed" />
+        <StatCard label="Claimed" value={String(claimedCount)} note="Received" />
+        <StatCard
+          label="Water funded"
+          value={`${waterFundedGallons} gal`}
+          note="From your roundups"
+        />
+      </dl>
 
-            <Link
-              href="/send"
-              className="btn-primary inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full font-medium text-xs sm:text-sm shadow-subtle shrink-0 min-h-[44px]"
-            >
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              <span>Create New Link</span>
-            </Link>
-          </div>
-
-          {/* Metric Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-5 sm:p-6 rounded-2xl bg-snow border border-mist/50">
-              <span className="text-xs font-mono uppercase tracking-wider text-ink-muted">
-                Total Volume
-              </span>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-serif text-ink mt-1 font-light tracking-[-0.03em]">
-                {formatCurrency(totalVolumeUsd, "USD")}
-              </p>
-              <span className="text-xs font-mono text-ink-muted mt-1 block">
-                {links.length} total transfers
-              </span>
-            </div>
-
-            <div className="p-5 sm:p-6 rounded-2xl bg-snow border border-mist/50">
-              <span className="text-xs font-mono uppercase tracking-wider text-amber-700">
-                Pending Escrows
-              </span>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-serif text-ink mt-1 font-light tracking-[-0.03em]">
-                {pendingCount}
-              </p>
-              <span className="text-xs font-mono text-ink-muted mt-1 block">
-                With 14-day safety lock
-              </span>
-            </div>
-
-            <div className="p-5 sm:p-6 rounded-2xl bg-snow border border-mist/50">
-              <span className="text-xs font-mono uppercase tracking-wider text-emerald-700">
-                Claimed & Settled
-              </span>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-serif text-ink mt-1 font-light tracking-[-0.03em]">
-                {claimedCount}
-              </p>
-              <span className="text-xs font-mono text-ink-muted mt-1 block">
-                Instant receiver transfer
-              </span>
-            </div>
-
-            <div className="p-5 sm:p-6 rounded-2xl bg-sky-50/50 border border-sky-200">
-              <span className="text-xs font-mono uppercase tracking-wider text-sky-800 flex items-center gap-1">
-                <Droplets className="w-3.5 h-3.5 text-sky-500" aria-hidden="true" />
-                Water Filtered
-              </span>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-serif text-sky-900 mt-1 font-light tracking-[-0.03em]">
-                {waterFundedGallons} Gal
-              </p>
-              <span className="text-xs font-mono text-sky-700 mt-1 block">
-                Lofi Mission roundups
-              </span>
-            </div>
-          </div>
-
-          {/* Filter Tabs */}
-          <div
-            role="tablist"
-            aria-label="Filter payment links by status"
-            className="flex items-center gap-2 border-b border-mist/30 pb-4 overflow-x-auto"
+      <div
+        role="tablist"
+        aria-label="Filter payment links by status"
+        className="-mx-4 mt-10 flex gap-1 overflow-x-auto px-4 py-1 sm:mx-0 sm:px-0 [scrollbar-width:none]"
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-controls="links-grid"
+            onClick={() => setActiveTab(tab.id)}
+            className={cn(
+              "btn btn-sm shrink-0 whitespace-nowrap px-3 sm:px-4",
+              activeTab === tab.id ? "bg-mist-light text-ink" : "btn-ghost"
+            )}
           >
-            {[
-              { id: "all", label: `All (${links.length})` },
-              { id: "pending", label: `Pending (${pendingCount})` },
-              { id: "claimed", label: `Claimed (${claimedCount})` },
-              {
-                id: "expired",
-                label: `Expired (${
-                  links.filter((l) => l.status === "expired" || l.status === "reclaimed").length
-                })`,
-              },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                aria-controls="links-grid"
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-4 py-2 rounded-full text-xs font-mono transition-all whitespace-nowrap min-h-[36px] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
-                  activeTab === tab.id
-                    ? "bg-ink text-white font-semibold"
-                    : "text-ink-muted hover:text-ink hover:bg-snow"
-                }`}
-              >
-                {tab.label}
-              </button>
+            {tab.label}
+            <span className="tabular-nums text-ink-muted">{tab.count}</span>
+          </button>
+        ))}
+      </div>
+
+      <div id="links-grid" role="tabpanel" aria-label="Payment links list" className="mt-4">
+        {filteredLinks.length === 0 ? (
+          <div className="well flex flex-col items-center px-6 py-16 text-center">
+            <h2 className="type-title">{EMPTY_COPY[activeTab]}</h2>
+            <p className="mt-2 max-w-sm text-base text-ink-muted">
+              Create a link, share it, and track it here.
+            </p>
+            <CreateLinkButton className="btn btn-secondary mt-6">
+              Create a payment link
+            </CreateLinkButton>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredLinks.map((link) => (
+              <LinkCard
+                key={link.id}
+                link={link}
+                onClawbackClick={(target) => setClawbackLink(target)}
+              />
             ))}
           </div>
+        )}
+      </div>
 
-          {/* Links Grid */}
-          <div id="links-grid" role="tabpanel" aria-label="Payment links list">
-            {filteredLinks.length === 0 ? (
-              <div className="py-20 text-center space-y-4 border border-dashed border-mist rounded-3xl p-8">
-                <p className="text-sm font-mono text-ink-muted">
-                  No payment links found in this category.
-                </p>
-                <Link
-                  href="/send"
-                  className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-medium min-h-[44px]"
-                >
-                  <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-                  <span>Create your first link</span>
-                </Link>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredLinks.map((link) => (
-                  <LinkCard
-                    key={link.id}
-                    link={link}
-                    onClawbackClick={(target) => setClawbackLink(target)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-
-      {/* Clawback confirmation modal */}
       <ClawbackModal
         link={clawbackLink}
         isOpen={!!clawbackLink}
         onClose={() => setClawbackLink(null)}
         onConfirmClawback={handleConfirmClawback}
       />
-
-      <Footer />
-    </div>
+    </PageShell>
   );
 }

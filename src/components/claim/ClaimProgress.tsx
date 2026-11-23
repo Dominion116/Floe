@@ -1,72 +1,55 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { RefreshCw, CheckCircle2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { ClaimVerificationState } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface ClaimProgressProps {
   state: ClaimVerificationState["step"];
 }
 
-export function ClaimProgress({ state }: ClaimProgressProps) {
-  const steps = [
-    { key: "authenticating", label: "Authenticating zkLogin..." },
-    { key: "verifying", label: "Verifying Ed25519 hash signature..." },
-    { key: "claiming", label: "Executing atomic PTB on Sui..." },
-  ];
+const STEPS = [
+  { key: "authenticating", label: "Authenticating…" },
+  { key: "verifying", label: "Verifying…" },
+  { key: "claiming", label: "Claiming…" },
+];
 
-  const currentIdx = steps.findIndex((s) => s.key === state);
+export function ClaimProgress({ state }: ClaimProgressProps) {
+  const currentIdx = STEPS.findIndex((s) => s.key === state);
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="bg-snow rounded-3xl p-8 border border-mist/50 text-center space-y-6"
-    >
-      <div className="w-16 h-16 mx-auto rounded-full bg-frost/40 border border-frost flex items-center justify-center animate-spin">
-        <RefreshCw className="w-7 h-7 text-ink" aria-hidden="true" />
-      </div>
+    <div role="status" className="rounded-3xl bg-snow px-6 py-12 text-center">
+      <h2 className="type-title">Moving the money to you</h2>
+      <p className="mt-1 text-sm text-ink-muted">Gas is covered, so you pay $0.00.</p>
 
-      <div className="space-y-2">
-        <h3 className="font-serif text-2xl font-light text-ink tracking-[-0.03em]">
-          Claiming funds into your account...
-        </h3>
-        <p className="text-xs font-mono text-ink-muted">
-          Gas 100% sponsored via Enoki Gas Station (<span className="text-emerald-600 font-semibold">$0.00</span>)
-        </p>
-      </div>
-
-      {/* Progress steps pill */}
-      <div className="space-y-2 max-w-xs mx-auto text-left pt-2">
-        {steps.map((s, idx) => {
+      <ol className="mx-auto mt-8 w-fit space-y-4 text-left">
+        {STEPS.map((s, idx) => {
           const isDone = idx < currentIdx;
           const isCurrent = idx === currentIdx;
           return (
-            <div
+            <li
               key={s.key}
-              className={`flex items-center gap-2.5 p-2 rounded-xl text-xs font-mono transition-colors ${
-                isCurrent
-                  ? "bg-white border border-frost text-ink font-medium"
-                  : isDone
-                  ? "text-emerald-700 bg-emerald-50/60"
-                  : "text-ink-muted opacity-40"
-              }`}
-            >
-              {isDone ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
-              ) : isCurrent ? (
-                <div
-                  className="w-4 h-4 rounded-full border-2 border-ink border-t-transparent animate-spin shrink-0"
-                  aria-hidden="true"
-                />
-              ) : (
-                <div className="w-4 h-4 rounded-full border border-mist shrink-0" aria-hidden="true" />
+              aria-current={isCurrent ? "step" : undefined}
+              className={cn(
+                "flex items-center gap-3 text-base",
+                isCurrent ? "font-medium text-ink" : "text-ink-muted"
               )}
-              <span>{s.label}</span>
-            </div>
+            >
+              <span className="flex h-5 w-5 items-center justify-center" aria-hidden="true">
+                {isDone ? (
+                  <Check className="h-5 w-5 text-success" />
+                ) : isCurrent ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <span className="h-2 w-2 rounded-full bg-mist-dark" />
+                )}
+              </span>
+              {s.label}
+              {isDone && <span className="sr-only">done</span>}
+            </li>
           );
         })}
-      </div>
+      </ol>
     </div>
   );
 }

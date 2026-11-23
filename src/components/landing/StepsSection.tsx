@@ -1,114 +1,106 @@
-"use client";
+import { Check } from "lucide-react";
+import { GoogleIcon } from "@/components/ui/BrandIcons";
+import { Reveal } from "@/components/ui/Reveal";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
-import { motion } from "framer-motion";
-import { Link2, Share2, Sparkles } from "lucide-react";
+/* Each step shows a piece of the real product instead of an icon. */
+
+function CreateMoment() {
+  return (
+    <div className="w-full max-w-[15rem] text-center">
+      <p className="type-figure text-5xl">
+        <span className="text-ink-muted">$</span>20
+      </p>
+      <div className="mt-4 flex justify-center gap-2 text-sm font-medium tabular-nums">
+        <span className="rounded-full border border-mist-dark px-3 py-1.5">$5</span>
+        <span className="rounded-full border border-ink px-3 py-1.5">$20</span>
+        <span className="rounded-full border border-mist-dark px-3 py-1.5">$50</span>
+      </div>
+    </div>
+  );
+}
+
+function ShareMoment() {
+  return (
+    <div className="flex w-full max-w-[15rem] flex-col gap-2">
+      <p className="self-start rounded-2xl rounded-bl-md bg-mist-light px-4 py-2.5 text-sm">
+        I got lunch, you get coffee?
+      </p>
+      <div className="self-end rounded-2xl rounded-br-md bg-frost px-4 py-2.5 text-sm">
+        <p>I sent you $20.00 with Floe.</p>
+        <p className="mt-0.5 font-mono text-[13px] text-ink/75">floe.app/claim</p>
+      </div>
+    </div>
+  );
+}
+
+function ClaimMoment() {
+  return (
+    <div className="flex w-full max-w-[15rem] flex-col gap-3">
+      <div className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-mist-dark bg-white text-sm font-medium [&_svg]:h-4 [&_svg]:w-4">
+        <GoogleIcon />
+        Continue with Google
+      </div>
+      <p className="flex items-center justify-center gap-2 text-sm font-medium text-success">
+        <Check className="h-4 w-4" />
+        $20.00 is in your account
+      </p>
+    </div>
+  );
+}
+
+const STEPS = [
+  {
+    title: "Create",
+    body: "Pick an amount and get a private link.",
+    moment: <CreateMoment />,
+  },
+  {
+    title: "Share",
+    body: "Send it on WhatsApp, Telegram, or iMessage.",
+    moment: <ShareMoment />,
+  },
+  {
+    title: "Claim",
+    body: "Your friend logs in with Google or Apple. Done.",
+    moment: <ClaimMoment />,
+  },
+];
 
 export function StepsSection() {
-  const steps = [
-    {
-      step: "01",
-      title: "Create",
-      subtitle: "Pick an amount and get a private link.",
-      description:
-        "Input your amount in dollars ($) or SUI. Choose a greeting card theme, add an optional personal note, and generate an encrypted payment link in 5 seconds.",
-      icon: Link2,
-      badge: "In-memory Ed25519",
-      accent: "bg-frost/40 border-frost text-ink",
-    },
-    {
-      step: "02",
-      title: "Share",
-      subtitle: "Send it on WhatsApp, Telegram, or iMessage.",
-      description:
-        "Copy your unique URL with one tap or share directly via message apps. The private key lives only in the URL fragment (#), so no intermediate server ever sees it.",
-      icon: Share2,
-      badge: "Zero Server Knowledge",
-      accent: "bg-mist-light border-mist text-ink",
-    },
-    {
-      step: "03",
-      title: "Claim",
-      subtitle: "Your friend logs in with Google or Apple. Done.",
-      description:
-        "The receiver opens the link on their phone, authenticates with Google in 1 click, and Sui zkLogin unlocks the funds directly to their new address with zero gas fees.",
-      icon: Sparkles,
-      badge: "Zero Seed Phrases",
-      accent: "bg-emerald-50 border-emerald-200 text-emerald-800",
-    },
-  ];
-
   return (
-    <section
-      id="how-it-works"
-      aria-labelledby="steps-heading"
-      className="py-20 md:py-28 lg:py-32 bg-snow border-t border-mist/30"
-    >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header with Scroll Animation */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center max-w-2xl mx-auto mb-16 md:mb-20 space-y-4"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-mist-light text-ink text-xs font-mono uppercase tracking-widest">
-            3-Step Architecture
-          </div>
-          <h2
-            id="steps-heading"
-            className="text-3xl sm:text-4xl md:text-5xl font-serif font-light text-ink tracking-[-0.03em] leading-tight"
-          >
-            How sending crypto feels like sending a text
-          </h2>
-          <p className="text-base sm:text-lg text-ink-muted leading-relaxed font-normal">
-            Floe bridges consumer simplicity with cryptographic non-custodial security. No wallet setup, no network switching, no confusion.
-          </p>
-        </motion.div>
+    <section id="how-it-works" aria-labelledby="steps-heading" className="section-padding bg-snow">
+      <div className="container-standard">
+        <SectionHeader
+          id="steps-heading"
+          title="Sending money feels like sending a text"
+          lede="Three steps for the two of you. Only the last one is theirs, and it takes one tap."
+        />
 
-        {/* 3 Step Cards with Staggered Scroll Animation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {steps.map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <motion.article
-                key={item.step}
-                initial={{ opacity: 0, y: 32 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.6, delay: idx * 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-white rounded-[28px] p-7 sm:p-8 border border-mist/50 shadow-subtle hover:shadow-card transition-all duration-200 flex flex-col justify-between group"
+        <Reveal>
+          <ol className="grid overflow-hidden rounded-3xl border border-mist/70 bg-white md:grid-cols-3">
+            {STEPS.map((step, idx) => (
+              <li
+                key={step.title}
+                className="flex flex-col border-mist/70 max-md:border-t max-md:first:border-t-0 md:border-l md:first:border-l-0"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <span className="font-mono text-2xl font-light text-ink-muted group-hover:text-ink transition-colors">
-                      {item.step}
-                    </span>
-                    <div className={`p-3 rounded-2xl border ${item.accent}`}>
-                      <Icon className="w-5 h-5" aria-hidden="true" />
-                    </div>
-                  </div>
-
-                  <h3 className="text-2xl font-serif font-normal text-ink mb-2 tracking-[-0.02em]">
-                    {item.title}
+                <div
+                  className="flex h-48 items-center justify-center px-6 lg:h-56"
+                  aria-hidden="true"
+                >
+                  {step.moment}
+                </div>
+                <div className="px-6 pb-6 lg:px-8 lg:pb-8">
+                  <h3 className="type-title">
+                    <span className="mr-2 text-ink-muted tabular-nums">{idx + 1}</span>
+                    {step.title}
                   </h3>
-                  <p className="text-sm font-medium text-ink mb-3 leading-snug">
-                    {item.subtitle}
-                  </p>
-                  <p className="text-xs sm:text-sm text-ink-muted leading-relaxed font-normal">
-                    {item.description}
-                  </p>
+                  <p className="mt-2 text-base leading-relaxed text-ink-muted">{step.body}</p>
                 </div>
-
-                <div className="pt-6 mt-6 border-t border-mist/20">
-                  <span className="inline-block text-[11px] font-mono px-2.5 py-1 rounded-md bg-snow text-ink-muted border border-mist/30">
-                    {item.badge}
-                  </span>
-                </div>
-              </motion.article>
-            );
-          })}
-        </div>
+              </li>
+            ))}
+          </ol>
+        </Reveal>
       </div>
     </section>
   );

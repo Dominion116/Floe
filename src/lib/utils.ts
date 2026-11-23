@@ -17,6 +17,13 @@ export function suiToUsd(sui: number): number {
   return parseFloat((sui * SUI_USD_RATE).toFixed(2));
 }
 
+/** Dollar value of an amount entered in any supported currency. */
+export function toUsd(amount: number, currency: "USD" | "SUI" | "LOFI"): number {
+  if (currency === "SUI") return suiToUsd(amount);
+  if (currency === "LOFI") return parseFloat((amount * LOFI_USD_RATE).toFixed(2));
+  return amount;
+}
+
 export function formatCurrency(amount: number, currency: 'USD' | 'SUI' | 'LOFI' = 'USD'): string {
   if (currency === 'USD') {
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

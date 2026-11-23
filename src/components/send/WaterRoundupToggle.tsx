@@ -1,6 +1,7 @@
 "use client";
 
-import { Droplets, Check } from "lucide-react";
+import { Droplets } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 interface WaterRoundupToggleProps {
   enabled: boolean;
@@ -13,61 +14,30 @@ export function WaterRoundupToggle({
   onToggle,
   donationAmountUsd,
 }: WaterRoundupToggleProps) {
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === " " || e.key === "Enter") {
-      e.preventDefault();
-      onToggle(!enabled);
-    }
-  };
-
   return (
-    <div
-      role="switch"
-      aria-checked={enabled}
-      tabIndex={0}
-      onClick={() => onToggle(!enabled)}
-      onKeyDown={handleKeyDown}
-      className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 min-h-[64px] ${
-        enabled
-          ? "border-sky-300 bg-sky-50/50"
-          : "border-mist/50 bg-white hover:border-mist"
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors shrink-0 ${
-            enabled ? "bg-sky-500 text-white" : "bg-mist-light text-ink-muted"
-          }`}
-          aria-hidden="true"
-        >
-          <Droplets className="w-5 h-5" />
-        </div>
-        <div>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs sm:text-sm font-semibold text-ink">
-              💧 Round up +${donationAmountUsd.toFixed(2)} to Clean Water
-            </span>
-            <span className="px-1.5 py-0.5 rounded bg-sky-100 text-[10px] font-mono text-sky-800">
-              Lofi Mission
-            </span>
-          </div>
-          <p className="text-xs text-ink-muted mt-0.5">
-            Atomically cleans 10 gallons of ocean water via on-chain treasury.
-          </p>
-        </div>
-      </div>
-
-      {/* Switch representation */}
-      <div
-        className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-all shrink-0 ml-2 ${
-          enabled
-            ? "bg-sky-500 border-sky-600 text-white"
-            : "border-mist/60 bg-snow text-transparent"
-        }`}
+    <label className="option flex items-center gap-3 rounded-2xl p-4">
+      <Droplets className="h-5 w-5 shrink-0 text-ink" aria-hidden="true" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium leading-5 text-ink">
+          Round up to donate 10¢ to clean ocean water
+        </span>
+        <span className="type-help block" aria-live="polite">
+          {enabled
+            ? `Adds ${formatCurrency(donationAmountUsd)} and funds 10 gallons.`
+            : "Off. Nothing is added to your total."}
+        </span>
+      </span>
+      <input
+        type="checkbox"
+        role="switch"
+        checked={enabled}
+        onChange={(e) => onToggle(e.target.checked)}
+        className="peer sr-only"
+      />
+      <span
+        className="relative h-6 w-10 shrink-0 rounded-full bg-control transition-colors duration-150 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-transform after:duration-150 peer-checked:bg-ink peer-checked:after:translate-x-4"
         aria-hidden="true"
-      >
-        <Check className="w-3.5 h-3.5 stroke-[3]" />
-      </div>
-    </div>
+      />
+    </label>
   );
 }

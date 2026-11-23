@@ -8,11 +8,9 @@ import { ClosingCtaSection } from "@/components/landing/ClosingCtaSection";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      {/* Unified Hero + Navigation (Hero38 template) */}
-      <HeroSection />
-
-      <main className="flex-1">
+    <div className="min-h-dvh flex flex-col bg-white">
+      <main id="main" tabIndex={-1} className="flex-1">
+        <HeroSection />
         <StepsSection />
         <LiveDemoSection />
         <WaterImpactSection />

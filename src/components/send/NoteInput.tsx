@@ -5,24 +5,16 @@ interface NoteInputProps {
   onChangeNote: (val: string) => void;
 }
 
-const PRESET_NOTES = [
-  "Thanks for lunch! ☕",
-  "Happy Birthday! 🎉",
-  "Split for the Uber 🚗",
-  "Dinner drinks last night 🍸",
-];
+const PRESET_NOTES = ["Thanks for lunch!", "Happy birthday!", "For the ride", "Dinner last night"];
 
 export function NoteInput({ note, onChangeNote }: NoteInputProps) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label
-          htmlFor="transfer-note"
-          className="block text-xs font-mono uppercase tracking-wider text-ink-muted"
-        >
-          Add a note
+    <div>
+      <div className="mb-2 flex items-baseline justify-between gap-4">
+        <label htmlFor="transfer-note" className="type-label">
+          Note <span className="font-normal text-ink-muted">(optional)</span>
         </label>
-        <span className="text-[10px] font-mono text-ink-muted" aria-live="polite">
+        <span id="transfer-note-count" className="type-help tabular-nums">
           {note.length}/60
         </span>
       </div>
@@ -31,19 +23,22 @@ export function NoteInput({ note, onChangeNote }: NoteInputProps) {
         id="transfer-note"
         type="text"
         maxLength={60}
+        autoComplete="off"
+        aria-describedby="transfer-note-count"
         value={note}
         onChange={(e) => onChangeNote(e.target.value)}
-        placeholder="e.g. Thanks for lunch yesterday! ☕"
-        className="w-full px-4 py-3 rounded-xl border border-mist/50 bg-white text-ink text-base sm:text-sm placeholder:text-ink-muted/50 focus:outline-none focus:border-ink focus-visible:ring-1 focus-visible:ring-ink transition-colors"
+        placeholder="Thanks for lunch!"
+        className="field"
       />
 
-      <div className="flex flex-wrap gap-1.5 pt-1" role="group" aria-label="Suggested note presets">
+      <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Suggested notes">
         {PRESET_NOTES.map((preset) => (
           <button
             key={preset}
             type="button"
+            aria-pressed={note === preset}
             onClick={() => onChangeNote(preset)}
-            className="text-xs px-3 py-1.5 rounded-full bg-snow border border-mist/40 text-ink-muted hover:text-ink hover:border-mist transition-all active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink min-h-[32px] flex items-center"
+            className="btn btn-sm btn-secondary font-normal aria-pressed:border-ink"
           >
             {preset}
           </button>

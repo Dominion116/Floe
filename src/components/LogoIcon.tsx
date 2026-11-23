@@ -14,7 +14,7 @@ export default function LogoIcon({ className = "w-8 h-8" }: { className?: string
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="23" cy="23" r="2.5" fill="#38BDF8" />
+      <circle cx="23" cy="23" r="2.5" fill="var(--color-frost)" />
     </svg>
   );
 }

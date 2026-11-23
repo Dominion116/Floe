@@ -1,114 +1,85 @@
 import Link from "next/link";
-import { Droplet, ShieldCheck, Zap } from "lucide-react";
+import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
+
+const linkClass =
+  "inline-flex min-h-[44px] md:min-h-[32px] items-center rounded-sm text-sm text-ink-muted hover:text-ink transition-colors duration-150";
+
+const PRODUCT_LINKS = [
+  { href: "/#demo", label: "Claim demo" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/dashboard/analytics", label: "Water impact" },
+];
+
+const ECOSYSTEM_LINKS = [
+  { href: "https://hackathon.lofitheyeti.com/", label: "Lofi the Yeti hackathon" },
+  { href: "https://sui.io", label: "Sui Network" },
+  {
+    href: "https://docs.sui.io/guides/developer/cryptography/zklogin",
+    label: "Sui zkLogin docs",
+  },
+];
 
 export function Footer() {
   return (
-    <footer aria-label="Site Footer" className="w-full border-t border-mist/30 bg-white pt-16 pb-12 mt-auto">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-mist/20">
-          {/* Brand info */}
-          <div className="md:col-span-2 space-y-4">
-            <Link href="/" className="inline-block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink rounded-md">
-              <span className="font-serif font-light text-3xl tracking-[-0.03em] text-ink">
-                Floe
-              </span>
+    <footer className="mt-auto border-t border-mist/60 bg-white">
+      <div className="container-standard pt-12 pb-8 lg:pt-16">
+        <div className="grid grid-cols-1 gap-10 min-[480px]:grid-cols-2 md:grid-cols-4">
+          <div className="min-[480px]:col-span-2">
+            <Link
+              href="/"
+              aria-label="Floe home"
+              className="rounded-md font-serif text-[28px] font-light leading-none tracking-[-0.03em] text-ink"
+            >
+              Floe
             </Link>
-            <p className="text-sm text-ink/75 max-w-sm leading-relaxed font-normal">
-              The 2-second payment link on Sui. Zero gas fees for receivers, zero seed phrases, and trustless URL fragment cryptography.
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-muted">
+              Send money with a link. Recipients pay no gas and need no wallet, and Floe never holds
+              the funds.
             </p>
-            <div className="flex flex-wrap items-center gap-4 text-xs text-ink/70">
-              <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" aria-hidden="true" />
-                Non-Custodial Escrow
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-amber-500" aria-hidden="true" />
-                Sponsored Gas (Enoki)
-              </span>
-            </div>
           </div>
 
-          {/* Product links */}
-          <div>
-            <h4 className="text-xs font-mono uppercase tracking-wider text-ink font-semibold mb-4">
-              Surfaces
-            </h4>
-            <ul className="space-y-3 text-sm text-ink/70">
+          <nav aria-labelledby="footer-product">
+            <h2 id="footer-product" className="mb-2 text-sm font-medium text-ink">
+              Product
+            </h2>
+            <ul>
               <li>
-                <Link href="/send" className="hover:text-ink transition-colors focus-visible:outline-2 focus-visible:outline-ink rounded">
-                  Create Payment Link
-                </Link>
+                <CreateLinkButton className={linkClass}>Create a payment link</CreateLinkButton>
               </li>
-              <li>
-                <Link href="/#demo" className="hover:text-ink transition-colors focus-visible:outline-2 focus-visible:outline-ink rounded">
-                  Claim Simulation Demo
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard" className="hover:text-ink transition-colors focus-visible:outline-2 focus-visible:outline-ink rounded">
-                  Sender Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard/analytics" className="hover:text-ink transition-colors focus-visible:outline-2 focus-visible:outline-ink rounded">
-                  Water Impact & Metrics
-                </Link>
-              </li>
+              {PRODUCT_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className={linkClass}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
-          </div>
+          </nav>
 
-          {/* Tech & Ecosystem */}
-          <div>
-            <h4 className="text-xs font-mono uppercase tracking-wider text-ink font-semibold mb-4">
-              Lofi Hackathon
-            </h4>
-            <ul className="space-y-3 text-sm text-ink/70">
-              <li>
-                <a
-                  href="https://hackathon.lofitheyeti.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-ink transition-colors flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-ink rounded"
-                >
-                  <span>Lofi The Yeti Hackathon</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://sui.io"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-ink transition-colors focus-visible:outline-2 focus-visible:outline-ink rounded"
-                >
-                  Sui Network
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://docs.sui.io/guides/developer/cryptography/zklogin"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-ink transition-colors focus-visible:outline-2 focus-visible:outline-ink rounded"
-                >
-                  Sui zkLogin Documentation
-                </a>
-              </li>
-              <li className="pt-1">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-mist-light text-[11px] text-ink font-mono">
-                  <Droplet className="w-3 h-3 text-sky-500" aria-hidden="true" />
-                  10¢ Clean Ocean Mission
-                </span>
-              </li>
+          <nav aria-labelledby="footer-ecosystem">
+            <h2 id="footer-ecosystem" className="mb-2 text-sm font-medium text-ink">
+              Ecosystem
+            </h2>
+            <ul>
+              {ECOSYSTEM_LINKS.map((link) => (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={linkClass}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
             </ul>
-          </div>
+          </nav>
         </div>
 
-        {/* Bottom bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-ink/70 gap-4">
-          <p>© {new Date().getFullYear()} Floe Protocol. Built for the Lofi the Yeti Hackathon.</p>
-          <p className="font-mono text-[11px]">
-            Package: <span className="text-ink font-semibold">Move 2024</span> · Protocol: <span className="text-ink font-semibold">Sui zkLogin</span>
-          </p>
+        <div className="mt-12 flex flex-col gap-2 text-[13px] text-ink-muted sm:flex-row sm:justify-between">
+          <p>© {new Date().getFullYear()} Floe. Built for the Lofi the Yeti hackathon.</p>
+          <p>Non-custodial escrow on Sui</p>
         </div>
       </div>
     </footer>

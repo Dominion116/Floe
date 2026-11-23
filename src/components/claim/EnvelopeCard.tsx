@@ -1,74 +1,66 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { Droplet } from "lucide-react";
+import { ThemeIcon } from "@/components/ui/ThemeIcon";
 import { CARD_THEMES } from "@/lib/themes";
 import { CardThemeId } from "@/lib/types";
-import { Droplet } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 interface EnvelopeCardProps {
   amountUsd: number;
   currency?: "USD" | "SUI" | "LOFI";
+  senderName?: string;
   recipientNote?: string;
   themeId?: CardThemeId;
   hasWaterDonation?: boolean;
+  compact?: boolean;
 }
 
 export function EnvelopeCard({
   amountUsd,
   currency = "USD",
-  recipientNote = "Here is a gift for you!",
+  senderName,
+  recipientNote = "A gift for you",
   themeId = "glacial",
-  hasWaterDonation = true,
+  hasWaterDonation = false,
+  compact = false,
 }: EnvelopeCardProps) {
   const theme = CARD_THEMES[themeId] || CARD_THEMES.glacial;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className={`rounded-3xl p-8 sm:p-10 border border-frost/60 bg-gradient-to-br ${theme.bgGradient} shadow-card text-center relative overflow-hidden`}
-    >
-      {/* Water impact pill if enabled */}
-      {hasWaterDonation && (
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-sky-200 text-sky-800 text-xs font-mono mb-4">
-          <Droplet className="w-3.5 h-3.5 text-sky-500" aria-hidden="true" />
-          <span>10 Gallons Ocean Water Funded</span>
-        </div>
+    <div
+      className={cn(
+        "rounded-3xl text-center",
+        theme.surfaceClass,
+        compact ? "p-5" : "p-6 sm:p-8"
       )}
-
-      {/* Real Sender Avatar & Title */}
-      <div className="flex items-center justify-center gap-2 mb-1">
-        <img
-          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80"
-          alt="Alex (Sender)"
-          className="w-6 h-6 rounded-full object-cover border border-white shadow-2xs"
-        />
-        <p className="text-xs font-mono uppercase tracking-widest text-ink-muted">
-          Payment Envelope from Alex
+    >
+      <div className="flex items-center justify-center gap-2">
+        <ThemeIcon theme={theme} />
+        <p className="text-sm font-medium text-ink">
+          {senderName ? `${senderName} sent you` : "Someone sent you"}
         </p>
       </div>
 
-      {/* Large Amount */}
-      <div className="text-6xl sm:text-7xl font-serif font-light text-ink my-3 tracking-[-0.03em]">
+      <p
+        className={cn(
+          "type-figure [overflow-wrap:anywhere]",
+          compact ? "my-3 text-4xl" : "my-5 text-5xl sm:text-6xl"
+        )}
+      >
         {formatCurrency(amountUsd, currency)}
-      </div>
+      </p>
 
-      {/* Note */}
       {recipientNote && (
-        <div className="max-w-xs mx-auto py-2.5 px-4 rounded-xl bg-white/70 border border-mist/30 mt-2">
-          <p className="text-xs sm:text-sm text-ink italic font-normal">
-            &ldquo;{recipientNote}&rdquo;
-          </p>
-        </div>
+        <p className="mx-auto max-w-xs font-serif text-lg leading-snug text-ink [overflow-wrap:anywhere]">
+          “{recipientNote}”
+        </p>
       )}
 
-      <div className="pt-6 mt-6 border-t border-mist/30 flex items-center justify-center gap-4 text-[11px] font-mono text-ink-muted">
-        <span>Verified Escrow on Sui</span>
-        <span>•</span>
-        <span>Sponsored Gas ($0.00)</span>
-      </div>
-    </motion.div>
+      {hasWaterDonation && (
+        <p className="mt-3 inline-flex items-center gap-1.5 text-[13px] leading-5 text-ink/75">
+          <Droplet className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Funds 10 gallons of clean water
+        </p>
+      )}
+    </div>
   );
 }
