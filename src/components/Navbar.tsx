@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
 import { useDialog } from "@/components/ui/Dialog";
@@ -31,30 +31,23 @@ function Wordmark({ onClick, light }: { onClick?: () => void; light?: boolean })
   );
 }
 
-/** One navbar for the whole product. `overlay` floats it on the landing hero until scrolled. */
+/**
+ * One navbar for the whole product: transparent, no border, scrolls with the page.
+ * `overlay` lays it over the dark landing hero with light text.
+ */
 export function Navbar({ overlay = false }: { overlay?: boolean }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    if (!overlay) return;
-    const handleScroll = () => setIsScrolled(window.scrollY > 16);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [overlay]);
 
   const closeMenu = () => setMenuOpen(false);
   const menu = useDialog(menuOpen, closeMenu);
-  const light = overlay && !isScrolled;
+  const light = overlay;
 
   return (
     <header
       className={cn(
-        "inset-x-0 top-0 z-20 border-b transition-colors duration-150",
-        overlay ? "fixed" : "sticky",
-        light ? "on-dark border-transparent" : "border-mist/60 bg-white"
+        "inset-x-0 top-0 z-20 bg-transparent",
+        overlay ? "on-dark absolute" : "relative"
       )}
     >
       <div className="container-standard flex h-16 items-center justify-between gap-4">

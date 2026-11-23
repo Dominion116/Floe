@@ -65,7 +65,7 @@
   }
 
   html {
-    scroll-padding-top: 5rem;
+    scroll-padding-top: 1rem;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -273,6 +273,10 @@
   }
   .menu-sheet[open] {
     @apply flex flex-col;
+  }
+  /* The sheet is white even when its header sits on the dark hero */
+  .menu-sheet :focus-visible {
+    outline-color: var(--color-ink);
   }
 
   .skip-link {
