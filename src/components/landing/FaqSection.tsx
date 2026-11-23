@@ -21,12 +21,12 @@ const FAQS = [
   {
     question: "Which tokens are supported?",
     answer:
-      "SUI, $LOFI and standard Sui coins. Amounts show in dollars by default, and you can switch to SUI or $LOFI.",
+      "SUI today, with $LOFI to follow on mainnet. Amounts show in dollars at the live price, and the link holds the token.",
   },
   {
     question: "How can someone claim without a wallet?",
     answer:
-      "They log in with Google or Apple. Sui zkLogin turns that login into a Sui account without putting their email or identity onchain.",
+      "They log in with Google. Sui zkLogin turns that login into a Sui account without putting their email or identity onchain.",
   },
 ];
 

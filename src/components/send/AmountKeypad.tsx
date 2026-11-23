@@ -1,24 +1,21 @@
 "use client";
 
 import { Delete } from "lucide-react";
+import { CURRENCIES, type Currency } from "@/lib/chain/config";
 import type { Rates } from "@/lib/types";
 import { approxUsd, cn, formatCurrency, toUsd, usdToToken } from "@/lib/utils";
 
 interface AmountKeypadProps {
   amountStr: string;
-  currency: "USD" | "SUI" | "LOFI";
+  currency: Currency;
   rates: Rates | null;
   ratesStatus: "loading" | "live" | "unavailable";
   error?: string | null;
   onChangeAmount: (val: string) => void;
-  onToggleCurrency: (curr: "USD" | "SUI" | "LOFI") => void;
+  onToggleCurrency: (curr: Currency) => void;
 }
 
-const CURRENCIES = [
-  { id: "USD", label: "USD" },
-  { id: "SUI", label: "SUI" },
-  { id: "LOFI", label: "$LOFI" },
-] as const;
+const LABELS: Record<Currency, string> = { USD: "USD", SUI: "SUI", LOFI: "$LOFI" };
 
 const PRESETS = [5, 20, 50];
 
@@ -81,8 +78,8 @@ export function AmountKeypad({
     <div className="space-y-5">
       <fieldset>
         <legend className="sr-only">Currency</legend>
-        <div className="mx-auto grid w-full max-w-[17.5rem] grid-cols-3 gap-1 rounded-full bg-mist-light p-1">
-          {CURRENCIES.map(({ id, label }) => (
+        <div className="mx-auto grid w-full max-w-[17.5rem] auto-cols-fr grid-flow-col gap-1 rounded-full bg-mist-light p-1">
+          {CURRENCIES.map((id) => (
             <label
               key={id}
               className={cn(
@@ -98,7 +95,7 @@ export function AmountKeypad({
                 onChange={() => onToggleCurrency(id)}
                 className="sr-only"
               />
-              {label}
+              {LABELS[id]}
             </label>
           ))}
         </div>

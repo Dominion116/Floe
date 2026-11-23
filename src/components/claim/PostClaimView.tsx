@@ -6,12 +6,12 @@ import { Check, CheckCircle2, Copy, ExternalLink } from "lucide-react";
 import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
 import { DetailList, type Detail } from "@/components/ui/DetailList";
 import { LiveValue } from "@/components/ui/LiveValue";
+import { explorerTxUrl, type Token } from "@/lib/chain/config";
 import { formatCurrency, maskAddress } from "@/lib/utils";
 
 interface PostClaimViewProps {
-  /** In `currency` */
   amount: number;
-  currency: "USD" | "SUI" | "LOFI";
+  token: Token;
   recipientAddress: string;
   txDigest: string;
   hasWaterDonation: boolean;
@@ -19,7 +19,7 @@ interface PostClaimViewProps {
 
 export function PostClaimView({
   amount,
-  currency,
+  token,
   recipientAddress,
   txDigest,
   hasWaterDonation,
@@ -54,19 +54,17 @@ export function PostClaimView({
     { label: "Transaction", value: maskAddress(txDigest), mono: true },
     { label: "Gas paid", value: "$0.00" },
   ];
-  if (currency !== "USD") {
-    details.unshift({
-      label: "Value now",
-      value: <LiveValue amount={amount} currency={currency} />,
-    });
-  }
+  details.unshift({
+    label: "Value now",
+    value: <LiveValue amount={amount} currency={token} />,
+  });
   if (hasWaterDonation) details.push({ label: "Clean water", value: "10 gallons" });
 
   return (
     <div className="card space-y-6 p-6 text-center sm:p-8">
       <div>
         <CheckCircle2 className="mx-auto h-10 w-10 text-success" aria-hidden="true" />
-        <h1 className="type-headline mt-4">{formatCurrency(amount, currency)} is yours</h1>
+        <h1 className="type-headline mt-4">{formatCurrency(amount, token)} is yours</h1>
         <p className="mt-2 text-base text-ink-muted">
           It’s in your own Sui account. Floe can’t move it.
         </p>
@@ -80,7 +78,7 @@ export function PostClaimView({
           Keep in account
         </Link>
         <a
-          href={`https://suiscan.xyz/testnet/tx/${txDigest}`}
+          href={explorerTxUrl(txDigest)}
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-secondary px-4"

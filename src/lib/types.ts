@@ -1,4 +1,6 @@
-export type CardThemeId = 'glacial' | 'coffee' | 'birthday' | 'water';
+import type { Currency, Token } from "./chain/config";
+
+export type CardThemeId = "glacial" | "coffee" | "birthday" | "water";
 
 export interface CardTheme {
   id: CardThemeId;
@@ -10,37 +12,36 @@ export interface CardTheme {
 }
 
 /** Dollar price of one token. */
-export interface Rates {
-  SUI: number;
-  LOFI: number;
-}
+export type Rates = Record<Token, number>;
 
-export type EscrowStatus = 'pending' | 'claimed' | 'expired' | 'reclaimed';
+/** `creating` means the payment was signed but its escrow isn't confirmed yet. */
+export type EscrowStatus = "creating" | "pending" | "claimed" | "expired" | "reclaimed";
 
-/** Saved in localStorage. Never add the private key here: it lives only in the link's # fragment. */
+/**
+ * A sender's history entry, saved in localStorage. The chain is the source of truth for status.
+ * Never add the private key here: it lives only in the link's # fragment.
+ */
 export interface PaymentLinkRecord {
-  id: string; // escrowId or local generated ID
-  ephemeralPublicKey: string;
-  // The same amount in each currency at the live price when the link was created.
-  // `currency` is the one the sender entered, and the only one that stays exact.
-  amountUsd: number;
-  amountSui: number;
-  amountLofi: number;
-  currency: 'USD' | 'SUI' | 'LOFI';
+  /** Digest of the create transaction. Known before it is sent, so it identifies the record. */
+  digest: string;
+  escrowId: string | null;
+  sender: string;
+  /** What the sender typed. */
+  currency: Currency;
+  enteredAmount: number;
+  /** What the escrow holds, in base units. */
+  token: Token;
+  amountUnits: string;
   recipientNote: string;
   themeId: CardThemeId;
-  waterDonationUsd: number;
-  waterDonationSui: number;
   hasWaterDonation: boolean;
   createdAt: number;
   expiresAt: number;
   status: EscrowStatus;
-  claimedByMasked?: string;
-  claimedAt?: number;
-  viewsCount?: number;
+  claimedBy?: string;
+  closedAt?: number;
 }
 
 export interface ClaimVerificationState {
-  step: 'idle' | 'authenticating' | 'verifying' | 'claiming' | 'success' | 'error';
-  errorMessage?: string;
+  step: "idle" | "authenticating" | "verifying" | "claiming" | "success";
 }

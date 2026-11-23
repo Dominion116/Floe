@@ -13,7 +13,7 @@
 
 ## Features
 
-- ✅ **Zero Seed Phrases (zkLogin):** Recipients authenticate via Google or Apple OAuth 2.0 without ever generating or securing a 12-to-24 word seed phrase.
+- ✅ **Zero Seed Phrases (zkLogin):** Recipients authenticate via Google OAuth 2.0 without ever generating or securing a 12-to-24 word seed phrase.
 - ✅ **Zero Gas Fees for Receivers:** 100% of claim transactions are gas-sponsored via Enoki and Sui Sponsored Transactions.
 - ✅ **Trustless URL Fragment Cryptography:** Ephemeral Ed25519 private keys are stored strictly in the URL hash fragment (`#`), ensuring keys never touch web servers or analytics CDNs.
 - ✅ **Lofi Clean Ocean Mission:** Built-in "Round up 10¢ to Clean Water" toggle that directs micro-donations directly to the Lofi Foundation Treasury on-chain.
@@ -113,89 +113,53 @@ Visit [http://localhost:3000](http://localhost:3000) to view the application.
 
 ## Usage
 
-### 1. Generating a Payment Link via Client SDK
+The transaction builders live in [`src/lib/chain/escrow.ts`](src/lib/chain/escrow.ts).
+
+### 1. Creating a payment link
 
 ```typescript
-import { generateEphemeralKeypair, buildClaimUrl } from "@/lib/crypto";
-import { Transaction } from "@mysten/sui/transactions";
+import { buildClaimUrl, generateEphemeralKeypair } from "@/lib/crypto";
+import { buildCreate, toUnits } from "@/lib/chain/escrow";
+import { LINK_DURATION_MS } from "@/lib/chain/config";
 
-// Step 1: Generate an in-memory ephemeral keypair
-const { privateKeyHex, publicKeyHex } = generateEphemeralKeypair();
+const { privateKey, publicKeyHex } = generateEphemeralKeypair();
 
-// Step 2: Build the programmable transaction block (PTB)
-const tx = new Transaction();
-const [escrowCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(10_000_000_000)]); // 10 SUI
-const clockObj = tx.object("0x6");
-
-tx.moveCall({
-  target: `${process.env.NEXT_PUBLIC_FLOE_PACKAGE_ID}::escrow::create_escrow`,
-  typeArguments: ["0x2::sui::SUI"],
-  arguments: [
-    escrowCoin,
-    tx.pure.vector("u8", Array.from(Buffer.from(publicKeyHex, "hex"))),
-    tx.pure.u64(14 * 24 * 60 * 60 * 1000), // 14-day duration (ms)
-    tx.pure.u64(100_000_000),             // 0.1 SUI clean water donation
-    tx.pure.u8(1),                        // Theme ID (e.g. 1 = Yeti Glacial)
-    clockObj,
-  ],
+// Signed and paid for by the sender's wallet
+const tx = buildCreate({
+  token: "SUI",
+  amountUnits: toUnits(10),
+  waterUnits: toUnits(0.15),
+  publicKeyHex,
+  durationMs: LINK_DURATION_MS,
+  themeId: "glacial",
 });
 
-// Step 3: Construct the trustless URL where secret key lives only in the hash fragment (#)
-const claimUrl = buildClaimUrl(
-  "https://floeonsui.vercel.app",
-  "0xEscrowObjectIdHere",
-  privateKeyHex
-);
-
-console.log("Shareable Link:", claimUrl);
-// Output: https://floeonsui.vercel.app/claim?id=0xEscrowObjectIdHere#ed25519_sk_...
+// The key and the note stay in the fragment, which never reaches a server
+const url = buildClaimUrl("https://floeonsui.vercel.app", escrowId, privateKey, "Thanks for lunch!");
 ```
 
-### 2. Claiming an Escrow Link (Recipient zkLogin)
+### 2. Claiming
 
 ```typescript
-import { extractKeyFromFragment } from "@/lib/crypto";
-import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
-import { bcs } from "@mysten/sui/bcs";
-import { Transaction } from "@mysten/sui/transactions";
+import { parseClaimFragment } from "@/lib/crypto";
+import { buildClaim } from "@/lib/chain/escrow";
 
-// 1. Extract ephemeral secret key from URL fragment
-const privateKeyHex = extractKeyFromFragment(window.location.hash);
-const ephemeralKeypair = Ed25519Keypair.fromSecretKey(privateKeyHex!);
+const { privateKey } = parseClaimFragment(window.location.hash);
 
-// 2. Sign recipient address with ephemeral key
-const recipientAddress = "0xRecipientZkLoginAddress";
-const addressBytes = bcs.Address.serialize(recipientAddress).toBytes();
-const signature = await ephemeralKeypair.sign(addressBytes);
-
-// 3. Build sponsored claim transaction
-const tx = new Transaction();
-tx.moveCall({
-  target: `${process.env.NEXT_PUBLIC_FLOE_PACKAGE_ID}::escrow::claim_escrow`,
-  typeArguments: ["0x2::sui::SUI"],
-  arguments: [
-    tx.object("0xEscrowObjectIdHere"),
-    tx.pure.vector("u8", Array.from(signature)),
-    tx.pure.address(recipientAddress),
-    tx.object("0x6"), // Sui Clock
-  ],
-});
+// Signs the escrow ID and recipient with the link's key, in the browser
+const tx = await buildClaim(escrow, privateKey, recipient);
 ```
 
-### 3. Reclaiming an Expired Escrow (Clawback)
+The recipient signs the transaction, then `POST /api/claim` checks that it is a single
+`claim_escrow` call, simulates it, and asks Enoki to pay the gas.
 
-If a link goes unclaimed past its expiration window (default 14 days), the sender can reclaim 100% of the funds:
+### 3. Refunding
 
 ```typescript
-const tx = new Transaction();
-tx.moveCall({
-  target: `${process.env.NEXT_PUBLIC_FLOE_PACKAGE_ID}::escrow::reclaim_escrow`,
-  typeArguments: ["0x2::sui::SUI"],
-  arguments: [
-    tx.object("0xEscrowObjectIdHere"),
-    tx.object("0x6"), // Sui Clock
-  ],
-});
+import { buildReclaim } from "@/lib/chain/escrow";
+
+// The sender can refund at any time until the link is claimed
+const tx = buildReclaim(escrow);
 ```
 
 ---
@@ -211,7 +175,7 @@ The core escrow contract is implemented in Move 2024 at [`move/sources/escrow.mo
 Locks tokens into a shared escrow object authenticated by the ephemeral public key.
 
 ```move
-public entry fun create_escrow<T>(
+public fun create_escrow<T>(
     coin: Coin<T>,
     ephem_pubkey: vector<u8>,
     duration_ms: u64,
@@ -228,7 +192,7 @@ public entry fun create_escrow<T>(
 | `ephem_pubkey` | `vector<u8>` | Yes | 32-byte Ed25519 public key generated client-side |
 | `duration_ms` | `u64` | Yes | Expiration duration in milliseconds (e.g. `1209600000` for 14 days) |
 | `water_cut` | `u64` | Yes | Micro-donation amount routed to clean water treasury (`0` if disabled) |
-| `theme_id` | `u8` | Yes | Visual gift card theme identifier (`1`–`4`) |
+| `theme_id` | `u8` | Yes | Visual gift card theme identifier (`0`–`3`) |
 | `clock` | `&Clock` | Yes | Sui framework Clock object (`0x6`) |
 | `ctx` | `&mut TxContext` | Yes | Transaction context |
 
@@ -238,10 +202,10 @@ public entry fun create_escrow<T>(
 
 #### `claim_escrow<T>`
 
-Validates the Ed25519 signature over the recipient's address, transfers principal balance to recipient, routes clean water donation, and deletes the escrow object.
+Validates the Ed25519 signature over the escrow ID and recipient, transfers principal balance to recipient, routes clean water donation, and deletes the escrow object.
 
 ```move
-public entry fun claim_escrow<T>(
+public fun claim_escrow<T>(
     escrow: PaymentEscrow<T>,
     signature: vector<u8>,
     recipient: address,
@@ -253,7 +217,7 @@ public entry fun claim_escrow<T>(
 | Parameter | Type | Required | Description |
 |-----------|------|:--------:|-------------|
 | `escrow` | `PaymentEscrow<T>` | Yes | The shared payment escrow object |
-| `signature` | `vector<u8>` | Yes | 64-byte Ed25519 signature of `bcs::to_bytes(&recipient)` |
+| `signature` | `vector<u8>` | Yes | 64-byte Ed25519 signature of the escrow ID (32 bytes) followed by the recipient (32 bytes) |
 | `recipient` | `address` | Yes | Beneficiary address (zkLogin derived or wallet) |
 | `clock` | `&Clock` | Yes | Sui framework Clock object (`0x6`) |
 | `ctx` | `&mut TxContext` | Yes | Transaction context |
@@ -264,20 +228,18 @@ public entry fun claim_escrow<T>(
 
 #### `reclaim_escrow<T>`
 
-Allows the original sender to cancel an unclaimed escrow and recover full funds once the expiration timestamp has passed.
+Returns everything to the sender. Allowed at any time until the escrow is claimed, before or after it expires.
 
 ```move
-public entry fun reclaim_escrow<T>(
+public fun reclaim_escrow<T>(
     escrow: PaymentEscrow<T>,
-    clock: &Clock,
     ctx: &mut TxContext
 )
 ```
 
 | Parameter | Type | Required | Description |
 |-----------|------|:--------:|-------------|
-| `escrow` | `PaymentEscrow<T>` | Yes | The expired payment escrow object |
-| `clock` | `&Clock` | Yes | Sui framework Clock object (`0x6`) |
+| `escrow` | `PaymentEscrow<T>` | Yes | The unclaimed payment escrow object |
 | `ctx` | `&mut TxContext` | Yes | Transaction context |
 
 **Emits:** `EscrowReclaimed { escrow_id, sender, amount }`
@@ -288,9 +250,9 @@ public entry fun reclaim_escrow<T>(
 
 | Function | Parameters | Return Type | Description |
 |----------|------------|-------------|-------------|
-| `generateEphemeralKeypair()` | `none` | `EphemeralKeys` | Generates a fresh Ed25519 keypair in memory. Returns `privateKeyHex`, `publicKeyHex`, and `address`. |
-| `buildClaimUrl()` | `baseUrl: string, escrowId: string, privateKeyHex: string` | `string` | Assembles the claim link placing the secret key strictly in the hash fragment (`#`). |
-| `extractKeyFromFragment()` | `hash: string` | `string \| null` | Safely parses the private key from `window.location.hash` on the client side. |
+| `generateEphemeralKeypair()` | `none` | `EphemeralKeys` | Generates a fresh Ed25519 keypair in memory. Returns `privateKey` and `publicKeyHex`. |
+| `buildClaimUrl()` | `baseUrl, escrowId, privateKey, note?` | `string` | Builds the claim link with the key and note strictly in the hash fragment (`#`). |
+| `parseClaimFragment()` | `hash: string` | `{ privateKey, note }` | Reads the key and note from `window.location.hash` in the browser. |
 
 ---
 
@@ -304,12 +266,11 @@ Configure these keys in your `.env.local` file:
 |----------|-------------|:--------:|-------------------|
 | `NEXT_PUBLIC_APP_URL` | Base URL used when building shareable claim links | Yes | `https://floeonsui.vercel.app` |
 | `NEXT_PUBLIC_SUI_NETWORK` | Target Sui network environment | Yes | `testnet` |
-| `NEXT_PUBLIC_SUI_RPC_URL` | Sui JSON-RPC API endpoint | Yes | `https://fullnode.testnet.sui.io:443` |
+| `NEXT_PUBLIC_SUI_RPC_URL` | Sui gRPC endpoint | No | `https://fullnode.testnet.sui.io:443` |
 | `NEXT_PUBLIC_FLOE_PACKAGE_ID` | Deployed Move package object ID | Yes | `0x...` |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID for zkLogin | Yes | `xxx.apps.googleusercontent.com` |
 | `NEXT_PUBLIC_ENOKI_API_KEY` | Public Enoki API key for gas sponsorship | Yes | `enoki_public_key_here` |
-| `ENOKI_SECRET_KEY` | Private Enoki API key for backend relayer | No | `enoki_private_key_here` |
-| `NEXT_PUBLIC_WATER_TREASURY_ADDRESS` | Lofi Clean Water on-chain treasury recipient | Yes | `0x10f1c1ea...` |
+| `ENOKI_SECRET_KEY` | Private Enoki API key, used by `/api/claim` to pay gas | Yes | `enoki_private_key_here` |
 
 ---
 
@@ -328,6 +289,25 @@ sui move build
 sui move test
 ```
 
+### Deploying to testnet
+
+```bash
+cd move
+sui client switch --env testnet
+sui client faucet
+sui client publish
+```
+
+Copy the published package ID into `NEXT_PUBLIC_FLOE_PACKAGE_ID`. Then, in the
+[Enoki Portal](https://enoki.mystenlabs.com):
+
+1. Add your Google OAuth client ID.
+2. Create a public key with zkLogin enabled and a private key with sponsored transactions enabled, both for testnet.
+3. Allow the Move call target `<package id>::escrow::claim_escrow`.
+
+In Google Cloud Console, add `http://localhost:3000/auth` and `https://<your domain>/auth` as
+authorized redirect URIs.
+
 ---
 
 ## Troubleshooting
@@ -339,8 +319,8 @@ sui move test
 - **Solution:** Send direct unshortened links (`https://floeonsui.vercel.app/claim?id=...#...`) or use the in-app QR code scanner.
 
 #### 2. zkLogin "Redirect URI Mismatch" (Error 400)
-- **Cause:** The current deployment domain is not registered in the Google Cloud Console Authorized JavaScript Origins.
-- **Solution:** Add `https://floeonsui.vercel.app` and `http://localhost:3000` to **Authorized JavaScript origins** and **Authorized redirect URIs** in your Google Cloud Console OAuth 2.0 Client settings.
+- **Cause:** This site's `/auth` page is not registered as a redirect URI in Google Cloud Console.
+- **Solution:** Add `https://floeonsui.vercel.app/auth` and `http://localhost:3000/auth` to **Authorized redirect URIs** in your Google Cloud Console OAuth 2.0 Client settings.
 
 #### 3. Sponsored Gas "Insufficient Sponsor Balance"
 - **Cause:** The Enoki sponsor gas pool is out of gas tokens on testnet.
@@ -348,10 +328,6 @@ sui move test
   ```bash
   curl -X POST https://faucet.testnet.sui.io/v1/gas -H "Content-Type: application/json" -d '{"FixedAmountRequest":{"recipient":"YOUR_ENOKI_SPONSOR_ADDRESS"}}'
   ```
-
-#### 4. "EscrowNotExpired" during clawback
-- **Cause:** Senders cannot claw back funds before the 14-day duration has elapsed.
-- **Solution:** Check the countdown timer on the Sender Dashboard card. Funds unlock automatically once `Clock::timestamp_ms >= expires_at_ms`.
 
 ---
 

@@ -1,24 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { PageShell } from "@/components/PageShell";
-import { CreateLinkButton, useCreateLink } from "@/components/create/CreateLinkProvider";
+import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
 import { DetailList } from "@/components/ui/DetailList";
-import { getStoredLinks } from "@/lib/storage";
-import { PaymentLinkRecord } from "@/lib/types";
+import { NETWORK, WATER_TREASURY, explorerAccountUrl } from "@/lib/chain/config";
+import { useLinks } from "@/lib/useLinks";
+import { maskAddress } from "@/lib/utils";
 
 export default function AnalyticsPage() {
-  const { createdCount } = useCreateLink();
-  const [links, setLinks] = useState<PaymentLinkRecord[]>([]);
-
-  useEffect(() => {
-    setLinks(getStoredLinks());
-  }, [createdCount]);
+  const { links } = useLinks();
 
   const totalTransfers = links.length;
   const claimedTransfers = links.filter((l) => l.status === "claimed").length;
   const claimRate = totalTransfers > 0 ? Math.round((claimedTransfers / totalTransfers) * 100) : 0;
-  const waterDonationsCount = links.filter((l) => l.hasWaterDonation).length;
+  const waterDonationsCount = links.filter(
+    (l) => l.hasWaterDonation && l.status === "claimed"
+  ).length;
   const totalGallonsFiltered = 48290 + waterDonationsCount * 10;
   const totalWaterFundedUsd = (totalGallonsFiltered / 10) * 0.10;
 
@@ -69,9 +66,22 @@ export default function AnalyticsPage() {
           <DetailList
             className="mt-auto"
             items={[
-              { label: "Network", value: "Sui Testnet" },
+              { label: "Network", value: NETWORK === "mainnet" ? "Sui Mainnet" : "Sui Testnet" },
               { label: "Module", value: "floe::escrow", mono: true },
-              { label: "Treasury", value: "0x10f1c1ea…0000", mono: true },
+              {
+                label: "Treasury",
+                value: (
+                  <a
+                    href={explorerAccountUrl(WATER_TREASURY)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link"
+                  >
+                    {maskAddress(WATER_TREASURY)}
+                  </a>
+                ),
+                mono: true,
+              },
             ]}
           />
         </section>

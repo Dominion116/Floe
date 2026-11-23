@@ -1,5 +1,7 @@
 "use client";
 
+import { MAX_NOTE_LENGTH } from "@/lib/crypto";
+
 interface NoteInputProps {
   note: string;
   onChangeNote: (val: string) => void;
@@ -15,14 +17,14 @@ export function NoteInput({ note, onChangeNote }: NoteInputProps) {
           Note <span className="font-normal text-ink-muted">(optional)</span>
         </label>
         <span id="transfer-note-count" className="type-help tabular-nums">
-          {note.length}/60
+          {note.length}/{MAX_NOTE_LENGTH}
         </span>
       </div>
 
       <input
         id="transfer-note"
         type="text"
-        maxLength={60}
+        maxLength={MAX_NOTE_LENGTH}
         autoComplete="off"
         aria-describedby="transfer-note-count"
         value={note}
