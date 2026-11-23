@@ -1,8 +1,14 @@
 # Floe — The 2-Second Payment Link on Sui
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-floeonsui.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://floeonsui.vercel.app)
+[![Sui Network](https://img.shields.io/badge/Blockchain-Sui_Network-4C72B0?style=for-the-badge&logo=sui&logoColor=white)](https://sui.io)
+[![Hackathon](https://img.shields.io/badge/Hackathon-Lofi_The_Yeti_CLAY_III-00B4D8?style=for-the-badge)](https://hackathon.lofitheyeti.com/)
+
+**Live URL:** [https://floeonsui.vercel.app](https://floeonsui.vercel.app)
+
 Floe is a consumer-grade crypto payment link application powered by the Sui Network. Senders generate an encrypted payment link in 5 seconds. The recipient — who has never touched crypto — clicks the link, taps "Continue with Google", and the funds land in their account in under 2 seconds with **zero gas fees** and **zero wallet setup required**.
 
-Built for the **Lofi the Yeti Hackathon** (November 2026).
+Built for the **Lofi the Yeti Hackathon (CLAY Hackathon III)**.
 
 ---
 
