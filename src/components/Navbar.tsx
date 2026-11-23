@@ -33,7 +33,7 @@ function Wordmark({ onClick, light }: { onClick?: () => void; light?: boolean })
 
 /**
  * One navbar for the whole product: transparent, no border, scrolls with the page.
- * `overlay` lays it over the dark landing hero with light text.
+ * `overlay` uses light text, for sitting inside the dark landing hero.
  */
 export function Navbar({ overlay = false }: { overlay?: boolean }) {
   const pathname = usePathname();
@@ -46,8 +46,8 @@ export function Navbar({ overlay = false }: { overlay?: boolean }) {
   return (
     <header
       className={cn(
-        "inset-x-0 top-0 z-20 bg-transparent",
-        overlay ? "on-dark absolute" : "relative"
+        "relative z-20 shrink-0 bg-transparent",
+        overlay && "on-dark"
       )}
     >
       <div className="container-standard flex h-16 items-center justify-between gap-4">

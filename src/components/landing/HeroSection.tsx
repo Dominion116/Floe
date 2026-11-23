@@ -4,23 +4,23 @@ import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
 
 export function HeroSection() {
   return (
-    <>
-      <Navbar overlay />
-      <section
-        aria-labelledby="hero-heading"
-        className="on-dark relative flex min-h-svh flex-col overflow-hidden bg-ink"
-      >
-        <div className="pointer-events-none absolute inset-0 select-none" aria-hidden="true">
-          <img
-            src="https://assets.watermelon.sh/bg-hero-38.avif"
-            alt=""
-            fetchPriority="high"
-            className="h-full w-full translate-y-20 object-cover object-bottom"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-ink/60 via-ink/20 to-ink/80" />
-        </div>
+    // Navbar and hero share one image and together fill one screen.
+    <div className="on-dark relative flex min-h-svh flex-col overflow-hidden bg-ink">
+      <div className="pointer-events-none absolute inset-0 select-none" aria-hidden="true">
+        <img
+          src="https://assets.watermelon.sh/bg-hero-38.avif"
+          alt=""
+          fetchPriority="high"
+          className="h-full w-full object-cover object-bottom"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink/60 via-ink/20 to-ink/80" />
+      </div>
 
-        <div className="container-standard relative flex flex-1 items-center justify-center pt-24 pb-16 text-center">
+      <Navbar overlay />
+
+      <section aria-labelledby="hero-heading" className="relative flex flex-1 flex-col">
+        {/* Bottom padding matches the navbar, so the copy centers on the whole screen */}
+        <div className="container-standard flex flex-1 items-center justify-center pt-6 pb-16 text-center">
           <div className="hero-enter flex max-w-[52rem] flex-col items-center">
             <h1 id="hero-heading" className="type-display text-white">
               Send money with a link. <span className="sm:block">No wallet needed.</span>
@@ -41,7 +41,7 @@ export function HeroSection() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
 
