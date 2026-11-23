@@ -9,13 +9,20 @@ export interface CardTheme {
   iconName: string;
 }
 
+/** Dollar price of one token. */
+export interface Rates {
+  SUI: number;
+  LOFI: number;
+}
+
 export type EscrowStatus = 'pending' | 'claimed' | 'expired' | 'reclaimed';
 
 /** Saved in localStorage. Never add the private key here: it lives only in the link's # fragment. */
 export interface PaymentLinkRecord {
   id: string; // escrowId or local generated ID
   ephemeralPublicKey: string;
-  // The same amount in each currency. `currency` is the one the sender entered.
+  // The same amount in each currency at the live price when the link was created.
+  // `currency` is the one the sender entered, and the only one that stays exact.
   amountUsd: number;
   amountSui: number;
   amountLofi: number;

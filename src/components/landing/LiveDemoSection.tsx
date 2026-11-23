@@ -98,7 +98,7 @@ export function LiveDemoSection() {
                     <DetailList
                       className="bg-white"
                       items={[
-                        { label: "Amount", value: "$5.00 (2.00 SUI)" },
+                        { label: "Amount", value: "$5.00" },
                         { label: "Gas paid", value: "$0.00" },
                         { label: "Clean water", value: "10 gallons" },
                       ]}

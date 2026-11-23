@@ -9,7 +9,8 @@ import { LinkCard } from "@/components/dashboard/LinkCard";
 import { StatCard } from "@/components/ui/StatCard";
 import { getStoredLinks, updateLinkStatus } from "@/lib/storage";
 import { PaymentLinkRecord } from "@/lib/types";
-import { cn, formatCurrency } from "@/lib/utils";
+import { usePrices } from "@/lib/usePrices";
+import { cn, entryAmount, formatCurrency, toUsd } from "@/lib/utils";
 
 type Tab = "all" | "pending" | "claimed" | "closed";
 
@@ -46,7 +47,22 @@ export default function DashboardPage() {
   const filteredLinks = links.filter((link) => matchesTab(link, activeTab));
 
   // Calculate summary metrics
-  const totalVolumeUsd = links.reduce((sum, l) => sum + l.amountUsd, 0);
+  const hasTokenLinks = links.some((l) => l.currency !== "USD");
+  const { rates, status: ratesStatus } = usePrices(hasTokenLinks);
+  // Null when a token link can't be valued, so the total is never silently wrong.
+  const totalVolumeUsd = links.reduce<number | null>((sum, l) => {
+    const usd = toUsd(entryAmount(l), l.currency, rates);
+    return sum === null || usd === null ? null : sum + usd;
+  }, 0);
+  const linkCount = `${links.length} ${links.length === 1 ? "link" : "links"}`;
+  const totalNote =
+    totalVolumeUsd === null
+      ? ratesStatus === "loading"
+        ? "Checking live prices…"
+        : "Live prices unavailable"
+      : hasTokenLinks
+        ? `${linkCount}, at live prices`
+        : linkCount;
   const pendingCount = links.filter((l) => l.status === "pending").length;
   const claimedCount = links.filter((l) => l.status === "claimed").length;
   const waterFundedGallons =
@@ -77,8 +93,8 @@ export default function DashboardPage() {
       <dl className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:mt-10 lg:grid-cols-4">
         <StatCard
           label="Total sent"
-          value={formatCurrency(totalVolumeUsd, "USD")}
-          note={`${links.length} ${links.length === 1 ? "link" : "links"}`}
+          value={totalVolumeUsd === null ? "—" : formatCurrency(totalVolumeUsd)}
+          note={totalNote}
         />
         <StatCard label="Pending" value={String(pendingCount)} note="Waiting to be claimed" />
         <StatCard label="Claimed" value={String(claimedCount)} note="Received" />

@@ -1,40 +1,36 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { Rates } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// 1 SUI = ~2.50 USD (example rate for calculation), 1 LOFI = ~0.05 USD
-export const SUI_USD_RATE = 2.50;
-export const LOFI_USD_RATE = 0.05;
-
-export function usdToSui(usd: number): number {
-  return parseFloat((usd / SUI_USD_RATE).toFixed(4));
+export function usdToToken(usd: number, rate: number): number {
+  return parseFloat((usd / rate).toFixed(4));
 }
 
-export function suiToUsd(sui: number): number {
-  return parseFloat((sui * SUI_USD_RATE).toFixed(2));
-}
-
-/** Dollar value of an amount entered in any supported currency. */
-export function toUsd(amount: number, currency: "USD" | "SUI" | "LOFI"): number {
-  if (currency === "SUI") return suiToUsd(amount);
-  if (currency === "LOFI") return parseFloat((amount * LOFI_USD_RATE).toFixed(2));
-  return amount;
+/** Dollar value of an amount in any supported currency. Null while the price is unknown. */
+export function toUsd(
+  amount: number,
+  currency: "USD" | "SUI" | "LOFI",
+  rates: Rates | null
+): number | null {
+  if (currency === "USD") return amount;
+  return rates ? amount * rates[currency] : null;
 }
 
 /** One entered amount, expressed in every currency a link record stores. */
 export function convertAmount(
   amount: number,
-  currency: "USD" | "SUI" | "LOFI"
+  currency: "USD" | "SUI" | "LOFI",
+  rates: Rates
 ): { amountUsd: number; amountSui: number; amountLofi: number } {
-  const rate = currency === "SUI" ? SUI_USD_RATE : currency === "LOFI" ? LOFI_USD_RATE : 1;
-  const usd = amount * rate;
+  const usd = currency === "USD" ? amount : amount * rates[currency];
   return {
-    amountUsd: currency === "USD" ? amount : parseFloat(usd.toFixed(2)),
-    amountSui: currency === "SUI" ? amount : usdToSui(usd),
-    amountLofi: currency === "LOFI" ? amount : parseFloat((usd / LOFI_USD_RATE).toFixed(4)),
+    amountUsd: currency === "USD" ? amount : parseFloat(usd.toFixed(6)),
+    amountSui: currency === "SUI" ? amount : usdToToken(usd, rates.SUI),
+    amountLofi: currency === "LOFI" ? amount : usdToToken(usd, rates.LOFI),
   };
 }
 
@@ -55,6 +51,15 @@ export function formatCurrency(amount: number, currency: 'USD' | 'SUI' | 'LOFI' 
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
   return `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })} ${currency}`;
+}
+
+export function approxUsd(usd: number): string {
+  return usd > 0 && usd < 0.01 ? "Less than $0.01" : `About ${formatCurrency(usd)}`;
+}
+
+/** "1 SUI = $0.6764". Four significant digits, since $LOFI trades well below a cent. */
+export function formatRate(token: "SUI" | "LOFI", rate: number): string {
+  return `1 ${token} = $${rate.toLocaleString("en-US", { maximumSignificantDigits: 4 })}`;
 }
 
 export function maskAddress(address: string): string {

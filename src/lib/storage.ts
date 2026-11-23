@@ -1,4 +1,4 @@
-import { PaymentLinkRecord } from "./types";
+import { PaymentLinkRecord, Rates } from "./types";
 import { convertAmount } from "./utils";
 
 const STORAGE_KEY = "floe_created_links_v1";
@@ -59,6 +59,9 @@ const SEED_LINKS: PaymentLinkRecord[] = [
   },
 ];
 
+/** The fixed example rates the first version used. Only for records made with them. */
+const LEGACY_RATES: Rates = { SUI: 2.5, LOFI: 0.05 };
+
 type LegacyRecord = PaymentLinkRecord & { ephemeralPrivateKey?: string };
 
 /**
@@ -68,7 +71,7 @@ type LegacyRecord = PaymentLinkRecord & { ephemeralPrivateKey?: string };
 function migrateRecord(record: LegacyRecord): PaymentLinkRecord {
   if (!("ephemeralPrivateKey" in record)) return record;
   const { ephemeralPrivateKey: _removed, ...rest } = record;
-  return { ...rest, ...convertAmount(rest.amountUsd, rest.currency) };
+  return { ...rest, ...convertAmount(rest.amountUsd, rest.currency, LEGACY_RATES) };
 }
 
 export function getStoredLinks(): PaymentLinkRecord[] {

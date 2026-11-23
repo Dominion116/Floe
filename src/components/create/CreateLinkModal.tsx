@@ -13,7 +13,8 @@ import { SharePanel } from "@/components/send/SharePanel";
 import { CardThemeId, PaymentLinkRecord } from "@/lib/types";
 import { generateEphemeralKeypair, buildClaimUrl } from "@/lib/crypto";
 import { saveCreatedLink } from "@/lib/storage";
-import { cn, convertAmount, formatCurrency, toUsd, usdToSui } from "@/lib/utils";
+import { refreshPrices, usePrices } from "@/lib/usePrices";
+import { cn, convertAmount, formatCurrency, formatRate, toUsd, usdToToken } from "@/lib/utils";
 
 const STEPS = [
   {
@@ -65,7 +66,17 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
 
   const numericAmount = parseFloat(amountStr) || 0;
   const waterDonationUsd = hasWaterDonation ? 0.10 : 0;
-  const totalUsd = toUsd(numericAmount, currency) + waterDonationUsd;
+  const { rates, status: ratesStatus } = usePrices(open);
+  const amountInUsd = toUsd(numericAmount, currency, rates);
+  // Paid in the chosen token. Dollar links are paid in SUI.
+  const payToken = currency === "LOFI" ? "LOFI" : "SUI";
+  const totalUsd = amountInUsd === null ? null : amountInUsd + waterDonationUsd;
+  const totalDisplay =
+    rates && totalUsd !== null
+      ? `${formatCurrency(totalUsd)} (${formatCurrency(usdToToken(totalUsd, rates[payToken]), payToken)})`
+      : ratesStatus === "loading"
+        ? "Checking live price…"
+        : "Live price unavailable";
   const current = STEPS[step];
 
   // Each step starts at the top with its title announced.
@@ -111,6 +122,11 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
 
   const handleCreateLink = () => {
     if (numericAmount <= 0) return;
+    if (!rates) {
+      setError("Live prices are unavailable, so the total can’t be worked out. Try again in a moment.");
+      void refreshPrices();
+      return;
+    }
     setIsCreating(true);
     setError(null);
 
@@ -134,12 +150,12 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
       const record: PaymentLinkRecord = {
         id: escrowId,
         ephemeralPublicKey: keypair.publicKeyHex,
-        ...convertAmount(numericAmount, currency),
+        ...convertAmount(numericAmount, currency, rates),
         currency,
         recipientNote: note.trim() || "A gift for you",
         themeId: selectedThemeId,
         waterDonationUsd,
-        waterDonationSui: usdToSui(waterDonationUsd),
+        waterDonationSui: usdToToken(waterDonationUsd, rates.SUI),
         hasWaterDonation,
         createdAt: Date.now(),
         expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 14, // 14 days default
@@ -234,6 +250,8 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
               <AmountKeypad
                 amountStr={amountStr}
                 currency={currency}
+                rates={rates}
+                ratesStatus={ratesStatus}
                 error={error}
                 onChangeAmount={handleAmountChange}
                 onToggleCurrency={setCurrency}
@@ -275,9 +293,10 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
                     { label: "Gas for them", value: "$0.00" },
                     { label: "Link expires", value: "In 14 days" },
                     {
-                      label: "Total from you",
-                      value: `${formatCurrency(totalUsd)} (${usdToSui(totalUsd)} SUI)`,
+                      label: "Live price",
+                      value: rates ? formatRate(payToken, rates[payToken]) : "Unavailable",
                     },
+                    { label: "Total from you", value: totalDisplay },
                   ]}
                 />
                 <p className="type-help">

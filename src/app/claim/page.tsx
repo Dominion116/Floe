@@ -145,7 +145,8 @@ function ClaimContent() {
 
       {claimState === "success" && (
         <PostClaimView
-          amountUsd={linkRecord.amountUsd}
+          amount={entryAmount(linkRecord)}
+          currency={linkRecord.currency}
           recipientAddress={recipientAddress}
           txDigest={txDigest}
           hasWaterDonation={linkRecord.hasWaterDonation}

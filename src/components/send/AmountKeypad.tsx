@@ -1,11 +1,14 @@
 "use client";
 
 import { Delete } from "lucide-react";
-import { cn, formatCurrency, toUsd, usdToSui } from "@/lib/utils";
+import type { Rates } from "@/lib/types";
+import { approxUsd, cn, formatCurrency, toUsd, usdToToken } from "@/lib/utils";
 
 interface AmountKeypadProps {
   amountStr: string;
   currency: "USD" | "SUI" | "LOFI";
+  rates: Rates | null;
+  ratesStatus: "loading" | "live" | "unavailable";
   error?: string | null;
   onChangeAmount: (val: string) => void;
   onToggleCurrency: (curr: "USD" | "SUI" | "LOFI") => void;
@@ -22,6 +25,8 @@ const PRESETS = [5, 20, 50];
 export function AmountKeypad({
   amountStr,
   currency,
+  rates,
+  ratesStatus,
   error,
   onChangeAmount,
   onToggleCurrency,
@@ -60,7 +65,15 @@ export function AmountKeypad({
     }
   };
 
-  const usdValue = toUsd(parseFloat(amountStr) || 0, currency);
+  const amount = parseFloat(amountStr) || 0;
+  const usdValue = toUsd(amount, currency, rates);
+  const equivalent = !rates
+    ? ratesStatus === "loading"
+      ? "Checking live prices…"
+      : "Live prices are unavailable right now."
+    : currency === "USD"
+      ? `About ${formatCurrency(usdToToken(amount, rates.SUI), "SUI")} at the live price`
+      : `${approxUsd(usdValue ?? 0)} at the live price`;
   const keyClass =
     "h-12 rounded-2xl bg-snow hover:bg-mist-light active:bg-mist-light text-xl text-ink tabular-nums flex items-center justify-center transition-colors duration-150";
 
@@ -124,10 +137,7 @@ export function AmountKeypad({
           role={error ? "alert" : undefined}
           className={cn("mt-2 text-sm tabular-nums", error ? "text-danger" : "text-ink-muted")}
         >
-          {error ??
-            (currency === "USD"
-              ? `About ${usdToSui(usdValue)} SUI`
-              : `About ${formatCurrency(usdValue)}`)}
+          {error ?? equivalent}
         </p>
       </div>
 

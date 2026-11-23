@@ -1,6 +1,8 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Droplet, ExternalLink } from "lucide-react";
+import { LiveValue } from "@/components/ui/LiveValue";
 import { PaymentLinkRecord } from "@/lib/types";
 import { cn, entryAmount, formatCurrency, formatTimeRemaining } from "@/lib/utils";
 
@@ -31,9 +33,12 @@ const formatDateTime = (ms: number) =>
 export function LinkCard({ link, onClawbackClick }: LinkCardProps) {
   const status = STATUS[link.status];
 
-  const details = [{ label: "Created", value: formatDate(link.createdAt) }];
+  const details: { label: string; value: ReactNode }[] = [{ label: "Created", value: formatDate(link.createdAt) }];
   if (link.currency !== "USD") {
-    details.unshift({ label: "Value", value: `About ${formatCurrency(link.amountUsd)}` });
+    details.unshift({
+      label: "Value now",
+      value: <LiveValue amount={entryAmount(link)} currency={link.currency} />,
+    });
   }
   if (link.status === "pending") {
     details.push({ label: "Expires", value: formatTimeRemaining(link.expiresAt) });

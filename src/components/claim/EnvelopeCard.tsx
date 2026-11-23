@@ -1,4 +1,5 @@
 import { Droplet } from "lucide-react";
+import { LiveValue } from "@/components/ui/LiveValue";
 import { ThemeIcon } from "@/components/ui/ThemeIcon";
 import { CARD_THEMES } from "@/lib/themes";
 import { CardThemeId } from "@/lib/types";
@@ -49,6 +50,12 @@ export function EnvelopeCard({
       >
         {formatCurrency(amount, currency)}
       </p>
+
+      {currency !== "USD" && (
+        <p className="-mt-2 mb-4 text-sm tabular-nums text-ink/75">
+          <LiveValue amount={amount} currency={currency} />
+        </p>
+      )}
 
       {recipientNote && (
         <p className="mx-auto max-w-xs font-serif text-lg leading-snug text-ink [overflow-wrap:anywhere]">
