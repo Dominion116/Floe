@@ -24,6 +24,32 @@ export function toUsd(amount: number, currency: "USD" | "SUI" | "LOFI"): number 
   return amount;
 }
 
+/** One entered amount, expressed in every currency a link record stores. */
+export function convertAmount(
+  amount: number,
+  currency: "USD" | "SUI" | "LOFI"
+): { amountUsd: number; amountSui: number; amountLofi: number } {
+  const rate = currency === "SUI" ? SUI_USD_RATE : currency === "LOFI" ? LOFI_USD_RATE : 1;
+  const usd = amount * rate;
+  return {
+    amountUsd: currency === "USD" ? amount : parseFloat(usd.toFixed(2)),
+    amountSui: currency === "SUI" ? amount : usdToSui(usd),
+    amountLofi: currency === "LOFI" ? amount : parseFloat((usd / LOFI_USD_RATE).toFixed(4)),
+  };
+}
+
+/** The amount in the currency the sender entered. */
+export function entryAmount(link: {
+  amountUsd: number;
+  amountSui: number;
+  amountLofi: number;
+  currency: "USD" | "SUI" | "LOFI";
+}): number {
+  if (link.currency === "SUI") return link.amountSui;
+  if (link.currency === "LOFI") return link.amountLofi;
+  return link.amountUsd;
+}
+
 export function formatCurrency(amount: number, currency: 'USD' | 'SUI' | 'LOFI' = 'USD'): string {
   if (currency === 'USD') {
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

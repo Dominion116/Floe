@@ -5,7 +5,8 @@ import { CardThemeId } from "@/lib/types";
 import { cn, formatCurrency } from "@/lib/utils";
 
 interface EnvelopeCardProps {
-  amountUsd: number;
+  /** In `currency` */
+  amount: number;
   currency?: "USD" | "SUI" | "LOFI";
   senderName?: string;
   recipientNote?: string;
@@ -15,7 +16,7 @@ interface EnvelopeCardProps {
 }
 
 export function EnvelopeCard({
-  amountUsd,
+  amount,
   currency = "USD",
   senderName,
   recipientNote = "A gift for you",
@@ -46,7 +47,7 @@ export function EnvelopeCard({
           compact ? "my-3 text-4xl" : "my-5 text-5xl sm:text-6xl"
         )}
       >
-        {formatCurrency(amountUsd, currency)}
+        {formatCurrency(amount, currency)}
       </p>
 
       {recipientNote && (

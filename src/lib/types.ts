@@ -11,10 +11,11 @@ export interface CardTheme {
 
 export type EscrowStatus = 'pending' | 'claimed' | 'expired' | 'reclaimed';
 
+/** Saved in localStorage. Never add the private key here: it lives only in the link's # fragment. */
 export interface PaymentLinkRecord {
   id: string; // escrowId or local generated ID
-  ephemeralPrivateKey: string; // stored in fragment for sharing, stored locally for sender history
   ephemeralPublicKey: string;
+  // The same amount in each currency. `currency` is the one the sender entered.
   amountUsd: number;
   amountSui: number;
   amountLofi: number;

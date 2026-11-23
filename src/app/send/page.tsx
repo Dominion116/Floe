@@ -28,7 +28,7 @@ export default function SendPage() {
           </CreateLinkButton>
         </div>
         <div className="space-y-4 w-full max-w-md mx-auto lg:mr-0">
-          <EnvelopeCard amountUsd={20} recipientNote="Thanks for lunch!" themeId="glacial" />
+          <EnvelopeCard amount={20} recipientNote="Thanks for lunch!" themeId="glacial" />
           <DetailList
             items={[
               { label: "Gas for them", value: "$0.00" },

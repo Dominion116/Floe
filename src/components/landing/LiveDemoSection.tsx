@@ -67,7 +67,7 @@ export function LiveDemoSection() {
                   <div className="space-y-4">
                     <EnvelopeCard
                       senderName="Alex"
-                      amountUsd={5}
+                      amount={5}
                       recipientNote="Breakfast coffee is on me."
                       themeId="glacial"
                       hasWaterDonation

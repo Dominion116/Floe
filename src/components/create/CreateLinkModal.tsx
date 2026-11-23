@@ -13,7 +13,7 @@ import { SharePanel } from "@/components/send/SharePanel";
 import { CardThemeId, PaymentLinkRecord } from "@/lib/types";
 import { generateEphemeralKeypair, buildClaimUrl } from "@/lib/crypto";
 import { saveCreatedLink } from "@/lib/storage";
-import { cn, formatCurrency, toUsd, usdToSui } from "@/lib/utils";
+import { cn, convertAmount, formatCurrency, toUsd, usdToSui } from "@/lib/utils";
 
 const STEPS = [
   {
@@ -56,6 +56,9 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
   const [generatedClaimUrl, setGeneratedClaimUrl] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The link exists only in this modal, so closing it unsaved asks first.
+  const [linkSaved, setLinkSaved] = useState(false);
+  const [confirmClose, setConfirmClose] = useState(false);
 
   const headingRef = useRef<HTMLHeadingElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -72,7 +75,24 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
     headingRef.current?.focus();
   }, [step, open]);
 
+  const hasUnsavedLink = step === SHARE && !linkSaved;
+
+  useEffect(() => {
+    if (!hasUnsavedLink) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [hasUnsavedLink]);
+
   const handleClose = () => {
+    if (hasUnsavedLink) {
+      setConfirmClose(true);
+      return;
+    }
+    closeAndReset();
+  };
+
+  const closeAndReset = () => {
     onClose();
     // An unfinished draft is kept. A finished one starts over next time.
     if (step === SHARE) {
@@ -83,6 +103,8 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
       setHasWaterDonation(true);
       setNote("");
       setGeneratedClaimUrl("");
+      setLinkSaved(false);
+      setConfirmClose(false);
     }
     setError(null);
   };
@@ -111,11 +133,8 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
       // 4. Save record into local sender storage
       const record: PaymentLinkRecord = {
         id: escrowId,
-        ephemeralPrivateKey: keypair.privateKeyHex,
         ephemeralPublicKey: keypair.publicKeyHex,
-        amountUsd: numericAmount,
-        amountSui: usdToSui(numericAmount),
-        amountLofi: numericAmount * 20,
+        ...convertAmount(numericAmount, currency),
         currency,
         recipientNote: note.trim() || "A gift for you",
         themeId: selectedThemeId,
@@ -131,6 +150,7 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
       saveCreatedLink(record);
 
       setGeneratedClaimUrl(claimUrl);
+      setLinkSaved(false);
       setStep(SHARE);
       onCreated();
     } catch (err) {
@@ -238,7 +258,7 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
             {current.id === "review" && (
               <div className="space-y-4">
                 <EnvelopeCard
-                  amountUsd={numericAmount}
+                  amount={numericAmount}
                   currency={currency}
                   recipientNote={note.trim() || "A gift for you"}
                   themeId={selectedThemeId}
@@ -276,11 +296,43 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
               <SharePanel
                 claimUrl={generatedClaimUrl}
                 amountDisplay={formatCurrency(numericAmount, currency)}
+                onSaved={() => {
+                  setLinkSaved(true);
+                  setConfirmClose(false);
+                }}
               />
             )}
           </div>
         </div>
 
+        {confirmClose && (
+          <div role="alert" className="shrink-0 px-4 pt-4 sm:px-6">
+            <p className="text-base font-medium text-ink">Close without saving the link?</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              You won’t be able to see it again. You can still refund the money from your dashboard.
+            </p>
+          </div>
+        )}
+
+        {confirmClose ? (
+          <footer className="modal-footer flex-col sm:flex-row-reverse">
+            <button
+              type="button"
+              autoFocus
+              onClick={() => setConfirmClose(false)}
+              className="btn btn-secondary sm:flex-1"
+            >
+              Keep it open
+            </button>
+            <button
+              type="button"
+              onClick={closeAndReset}
+              className="btn btn-danger-ghost sm:flex-1"
+            >
+              Close without saving
+            </button>
+          </footer>
+        ) : (
         <footer className="modal-footer">
           {step > 0 && step < SHARE && (
             <button type="button" onClick={handleBack} className="btn btn-secondary">
@@ -308,6 +360,7 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
             )}
           </button>
         </footer>
+        )}
       </form>
     </Modal>
   );

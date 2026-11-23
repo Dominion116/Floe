@@ -8,21 +8,29 @@ import { ClawbackModal } from "@/components/dashboard/ClawbackModal";
 import { LinkCard } from "@/components/dashboard/LinkCard";
 import { StatCard } from "@/components/ui/StatCard";
 import { getStoredLinks, updateLinkStatus } from "@/lib/storage";
-import { PaymentLinkRecord, EscrowStatus } from "@/lib/types";
+import { PaymentLinkRecord } from "@/lib/types";
 import { cn, formatCurrency } from "@/lib/utils";
 
-const EMPTY_COPY: Record<"all" | EscrowStatus, string> = {
+type Tab = "all" | "pending" | "claimed" | "closed";
+
+/** Drives both the tab counts and the list, so they always agree. */
+const matchesTab = (link: PaymentLinkRecord, tab: Tab) =>
+  tab === "all" ||
+  (tab === "closed"
+    ? link.status === "expired" || link.status === "reclaimed"
+    : link.status === tab);
+
+const EMPTY_COPY: Record<Tab, string> = {
   all: "You haven’t created a link yet",
   pending: "No links are waiting to be claimed",
   claimed: "None of your links have been claimed yet",
-  expired: "None of your links have expired",
-  reclaimed: "You haven’t refunded any links",
+  closed: "None of your links have expired or been refunded",
 };
 
 export default function DashboardPage() {
   const { createdCount } = useCreateLink();
   const [links, setLinks] = useState<PaymentLinkRecord[]>([]);
-  const [activeTab, setActiveTab] = useState<"all" | EscrowStatus>("all");
+  const [activeTab, setActiveTab] = useState<Tab>("all");
   const [clawbackLink, setClawbackLink] = useState<PaymentLinkRecord | null>(null);
 
   // Reloads when the create modal saves a link on top of this page.
@@ -35,10 +43,7 @@ export default function DashboardPage() {
     setLinks(getStoredLinks());
   };
 
-  const filteredLinks = links.filter((link) => {
-    if (activeTab === "all") return true;
-    return link.status === activeTab;
-  });
+  const filteredLinks = links.filter((link) => matchesTab(link, activeTab));
 
   // Calculate summary metrics
   const totalVolumeUsd = links.reduce((sum, l) => sum + l.amountUsd, 0);
@@ -47,16 +52,14 @@ export default function DashboardPage() {
   const waterFundedGallons =
     links.filter((l) => l.hasWaterDonation).length * 10;
 
-  const tabs: { id: "all" | EscrowStatus; label: string; count: number }[] = [
-    { id: "all", label: "All", count: links.length },
-    { id: "pending", label: "Pending", count: pendingCount },
-    { id: "claimed", label: "Claimed", count: claimedCount },
-    {
-      id: "expired",
-      label: "Expired",
-      count: links.filter((l) => l.status === "expired" || l.status === "reclaimed").length,
-    },
-  ];
+  const tabs = (
+    [
+      { id: "all", label: "All" },
+      { id: "pending", label: "Pending" },
+      { id: "claimed", label: "Claimed" },
+      { id: "closed", label: "Expired or refunded" },
+    ] as const
+  ).map((tab) => ({ ...tab, count: links.filter((l) => matchesTab(l, tab.id)).length }));
 
   return (
     <PageShell>

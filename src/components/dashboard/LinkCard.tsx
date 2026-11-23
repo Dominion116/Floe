@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Copy, Droplet, ExternalLink } from "lucide-react";
-import { buildClaimUrl } from "@/lib/crypto";
+import { Droplet, ExternalLink } from "lucide-react";
 import { PaymentLinkRecord } from "@/lib/types";
-import { cn, formatCurrency, formatTimeRemaining } from "@/lib/utils";
+import { cn, entryAmount, formatCurrency, formatTimeRemaining } from "@/lib/utils";
 
 interface LinkCardProps {
   link: PaymentLinkRecord;
@@ -31,28 +29,12 @@ const formatDateTime = (ms: number) =>
   });
 
 export function LinkCard({ link, onClawbackClick }: LinkCardProps) {
-  const [copied, setCopied] = useState(false);
-
-  const baseUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
-
-  const fullClaimUrl = buildClaimUrl(
-    baseUrl,
-    link.id,
-    link.ephemeralPrivateKey
-  );
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(fullClaimUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const status = STATUS[link.status];
 
   const details = [{ label: "Created", value: formatDate(link.createdAt) }];
+  if (link.currency !== "USD") {
+    details.unshift({ label: "Value", value: `About ${formatCurrency(link.amountUsd)}` });
+  }
   if (link.status === "pending") {
     details.push({ label: "Expires", value: formatTimeRemaining(link.expiresAt) });
   }
@@ -68,7 +50,7 @@ export function LinkCard({ link, onClawbackClick }: LinkCardProps) {
     <article className="card flex min-w-0 flex-col p-5">
       <div className="flex items-start justify-between gap-3">
         <h2 className="type-figure min-w-0 text-3xl [overflow-wrap:anywhere]">
-          {formatCurrency(link.amountUsd, link.currency)}
+          {formatCurrency(entryAmount(link), link.currency)}
         </h2>
         <span className={cn("badge shrink-0", status.className)}>{status.label}</span>
       </div>
@@ -91,28 +73,24 @@ export function LinkCard({ link, onClawbackClick }: LinkCardProps) {
 
       <div className="mt-auto pt-5">
         {link.status === "pending" && (
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="btn btn-sm btn-secondary flex-1 whitespace-nowrap"
-            >
-              {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-              <span aria-live="polite">{copied ? "Copied" : "Copy link"}</span>
-            </button>
+          <>
+            <p className="type-help mb-3">
+              Floe doesn’t keep the private link. If you lost it, refund this one and create
+              another.
+            </p>
             <button
               type="button"
               onClick={() => onClawbackClick(link)}
-              className="btn btn-sm btn-danger-ghost flex-1 whitespace-nowrap"
+              className="btn btn-sm btn-secondary w-full"
             >
               Cancel & refund
             </button>
-          </div>
+          </>
         )}
 
         {link.status === "claimed" && (
           <a
-            href={fullClaimUrl}
+            href={`/claim?id=${encodeURIComponent(link.id)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-sm btn-secondary w-full"

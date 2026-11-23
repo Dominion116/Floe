@@ -1,11 +1,11 @@
 import { PaymentLinkRecord } from "./types";
+import { convertAmount } from "./utils";
 
 const STORAGE_KEY = "floe_created_links_v1";
 
 const SEED_LINKS: PaymentLinkRecord[] = [
   {
     id: "escrow_0x7b2f8491c1092e01",
-    ephemeralPrivateKey: "suiprivkey_mock_1",
     ephemeralPublicKey: "0x892a01948ba1",
     amountUsd: 15.00,
     amountSui: 6.0,
@@ -23,7 +23,6 @@ const SEED_LINKS: PaymentLinkRecord[] = [
   },
   {
     id: "escrow_0x4a9d1956e84920b2",
-    ephemeralPrivateKey: "suiprivkey_mock_2",
     ephemeralPublicKey: "0x3456fe8901ab",
     amountUsd: 50.00,
     amountSui: 20.0,
@@ -43,7 +42,6 @@ const SEED_LINKS: PaymentLinkRecord[] = [
   },
   {
     id: "escrow_0x91ec084920b48192",
-    ephemeralPrivateKey: "suiprivkey_mock_3",
     ephemeralPublicKey: "0x9810afb7492c",
     amountUsd: 10.00,
     amountSui: 4.0,
@@ -61,6 +59,18 @@ const SEED_LINKS: PaymentLinkRecord[] = [
   },
 ];
 
+type LegacyRecord = PaymentLinkRecord & { ephemeralPrivateKey?: string };
+
+/**
+ * Older records carried the private key and kept the raw SUI or $LOFI amount in
+ * amountUsd. The key's presence marks a record as old, so this runs once per record.
+ */
+function migrateRecord(record: LegacyRecord): PaymentLinkRecord {
+  if (!("ephemeralPrivateKey" in record)) return record;
+  const { ephemeralPrivateKey: _removed, ...rest } = record;
+  return { ...rest, ...convertAmount(rest.amountUsd, rest.currency) };
+}
+
 export function getStoredLinks(): PaymentLinkRecord[] {
   if (typeof window === "undefined") return SEED_LINKS;
   try {
@@ -70,7 +80,12 @@ export function getStoredLinks(): PaymentLinkRecord[] {
       return SEED_LINKS;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : SEED_LINKS;
+    if (!Array.isArray(parsed)) return SEED_LINKS;
+    const links = (parsed as LegacyRecord[]).map(migrateRecord);
+    if (links.some((link, idx) => link !== parsed[idx])) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+    }
+    return links;
   } catch {
     return SEED_LINKS;
   }

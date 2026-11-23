@@ -7,9 +7,11 @@ import { AtSign, Check, Copy, Download, MessageCircle, MessageSquare, Send } fro
 interface SharePanelProps {
   claimUrl: string;
   amountDisplay: string;
+  /** Called once the sender has copied, shared or downloaded the link. */
+  onSaved: () => void;
 }
 
-export function SharePanel({ claimUrl, amountDisplay }: SharePanelProps) {
+export function SharePanel({ claimUrl, amountDisplay, onSaved }: SharePanelProps) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const inputRef = useRef<HTMLInputElement>(null);
   const qrRef = useRef<HTMLCanvasElement>(null);
@@ -18,6 +20,7 @@ export function SharePanel({ claimUrl, amountDisplay }: SharePanelProps) {
     try {
       await navigator.clipboard.writeText(claimUrl);
       setCopyState("copied");
+      onSaved();
       setTimeout(() => setCopyState("idle"), 2500);
     } catch {
       // Some in-app browsers block clipboard access
@@ -33,6 +36,7 @@ export function SharePanel({ claimUrl, amountDisplay }: SharePanelProps) {
     anchor.href = qrRef.current.toDataURL("image/png");
     anchor.download = "floe-payment-link.png";
     anchor.click();
+    onSaved();
   };
 
   const message = `I sent you ${amountDisplay} with Floe. Claim it here: ${claimUrl}`;
@@ -63,6 +67,7 @@ export function SharePanel({ claimUrl, amountDisplay }: SharePanelProps) {
             readOnly
             value={claimUrl}
             onFocus={(e) => e.currentTarget.select()}
+            onCopy={onSaved}
             className="field flex-1 min-w-0 truncate font-mono"
           />
           <button type="button" onClick={handleCopy} className="btn btn-primary shrink-0">
@@ -73,7 +78,7 @@ export function SharePanel({ claimUrl, amountDisplay }: SharePanelProps) {
         <p role="status" className="type-help mt-2">
           {copyState === "failed"
             ? "Copy is blocked in this browser. The link is selected, so you can copy it yourself."
-            : "The key stays after the # in the link and never reaches a server."}
+            : "Save it now. Floe doesn’t keep a copy, so you won’t see it again."}
         </p>
       </div>
 
@@ -84,6 +89,7 @@ export function SharePanel({ claimUrl, amountDisplay }: SharePanelProps) {
             <li key={name}>
               <a
                 href={href}
+                onClick={onSaved}
                 target={href.startsWith("sms:") ? undefined : "_blank"}
                 rel="noopener noreferrer"
                 className="btn btn-sm btn-secondary w-full"

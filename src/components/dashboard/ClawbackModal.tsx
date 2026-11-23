@@ -5,7 +5,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { DetailList } from "@/components/ui/DetailList";
 import { Modal, ModalClose } from "@/components/ui/Dialog";
 import { PaymentLinkRecord } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
+import { entryAmount, formatCurrency } from "@/lib/utils";
 
 interface ClawbackModalProps {
   link: PaymentLinkRecord | null;
@@ -38,7 +38,7 @@ export function ClawbackModal({
     }, 700);
   };
 
-  const amount = link ? formatCurrency(link.amountUsd, link.currency) : "";
+  const amount = link ? formatCurrency(entryAmount(link), link.currency) : "";
 
   return (
     <Modal

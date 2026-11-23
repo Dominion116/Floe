@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode, type RefObject, type SyntheticEvent } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject, type SyntheticEvent } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,7 @@ export function useDialog(
   initialFocus?: RefObject<HTMLElement | null>
 ) {
   const ref = useRef<HTMLDialogElement>(null);
+  const [nativeCloses, setNativeCloses] = useState(0);
 
   useEffect(() => {
     const el = ref.current;
@@ -24,7 +25,7 @@ export function useDialog(
     } else if (!open && el.open) {
       el.close();
     }
-  }, [open, initialFocus]);
+  }, [open, initialFocus, nativeCloses]);
 
   return {
     ref,
@@ -33,7 +34,10 @@ export function useDialog(
       onClose();
     },
     onClose: () => {
-      if (open) onClose();
+      if (!open) return;
+      onClose();
+      // Browsers can force-close on a repeated Escape. Reopen if onClose declined.
+      setNativeCloses((n) => n + 1);
     },
   };
 }

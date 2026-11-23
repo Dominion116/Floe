@@ -9,6 +9,7 @@ import { PostClaimView } from "@/components/claim/PostClaimView";
 import { getLinkById, updateLinkStatus } from "@/lib/storage";
 import { PaymentLinkRecord, ClaimVerificationState } from "@/lib/types";
 import { extractKeyFromFragment } from "@/lib/crypto";
+import { entryAmount } from "@/lib/utils";
 import { celebrate } from "@/lib/celebrate";
 import { AppleIcon, GoogleIcon } from "@/components/ui/BrandIcons";
 import { Wallet } from "lucide-react";
@@ -43,7 +44,6 @@ function ClaimContent() {
       // Default fallback envelope for demo links
       setLinkRecord({
         id: escrowId,
-        ephemeralPrivateKey: "mock_sk",
         ephemeralPublicKey: "mock_pk",
         amountUsd: 10.0,
         amountSui: 4.0,
@@ -98,7 +98,7 @@ function ClaimContent() {
         <>
           <h1 className="sr-only">Claim your payment</h1>
           <EnvelopeCard
-            amountUsd={linkRecord.amountUsd}
+            amount={entryAmount(linkRecord)}
             currency={linkRecord.currency}
             recipientNote={linkRecord.recipientNote}
             themeId={linkRecord.themeId}
