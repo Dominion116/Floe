@@ -234,21 +234,8 @@ export function HeroSection() {
             animate="show"
             className="flex max-w-[840px] flex-col items-center"
           >
-            {/* Trusted Badge */}
-            <motion.div
-              variants={itemVariants}
-              className="will-change-transform mb-4"
-            >
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.15)] border-none">
-                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-mono font-medium text-ink">
-                  Sui zkLogin · Zero Gas Fees · Non-Custodial
-                </span>
-              </div>
-            </motion.div>
-
             {/* Headline */}
-            <motion.h1 className="mt-2 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-light tracking-[-0.03em] leading-[1.08] text-balance text-white">
+            <motion.h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-light tracking-[-0.03em] leading-[1.08] text-balance text-white">
               <motion.span
                 variants={titleLineVariants}
                 className="block will-change-transform"
