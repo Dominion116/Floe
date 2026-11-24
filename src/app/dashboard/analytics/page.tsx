@@ -3,9 +3,11 @@
 import { PageShell } from "@/components/PageShell";
 import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
 import { DetailList } from "@/components/ui/DetailList";
+import { StatCard } from "@/components/ui/StatCard";
 import { NETWORK, WATER_TREASURY, explorerAccountUrl } from "@/lib/chain/config";
+import { useImpact } from "@/lib/useImpact";
 import { useLinks } from "@/lib/useLinks";
-import { maskAddress } from "@/lib/utils";
+import { approxUsd, maskAddress } from "@/lib/utils";
 
 export default function AnalyticsPage() {
   const { links } = useLinks();
@@ -13,27 +15,25 @@ export default function AnalyticsPage() {
   const totalTransfers = links.length;
   const claimedTransfers = links.filter((l) => l.status === "claimed").length;
   const claimRate = totalTransfers > 0 ? Math.round((claimedTransfers / totalTransfers) * 100) : 0;
-  const waterDonationsCount = links.filter(
-    (l) => l.hasWaterDonation && l.status === "claimed"
-  ).length;
-  const totalGallonsFiltered = 48290 + waterDonationsCount * 10;
-  const totalWaterFundedUsd = (totalGallonsFiltered / 10) * 0.10;
+  const impact = useImpact();
 
   const stats = [
+    { label: "Sent to the treasury", value: impact.donated, note: "By every Floe claim" },
     {
-      label: "Clean water funded",
-      value: totalGallonsFiltered.toLocaleString("en-US"),
-      note: "Gallons, including a sample baseline of 48,290",
+      label: "Roundups",
+      value: impact.roundups,
+      note:
+        impact.claims === null
+          ? "From claimed links"
+          : `From ${impact.claims} claimed ${impact.claims === 1 ? "link" : "links"}`,
     },
     {
-      label: "Roundup value",
-      value: `$${totalWaterFundedUsd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-      note: "10¢ from each roundup",
-    },
-    {
-      label: "Your claim rate",
-      value: `${claimRate}%`,
-      note: `${claimedTransfers} of ${totalTransfers} links claimed`,
+      label: "Water funded",
+      value: impact.gallons,
+      note:
+        impact.usd === null
+          ? "At 10 gallons per 10¢"
+          : `${approxUsd(impact.usd)} at live prices, at 10 gallons per 10¢`,
     },
   ];
 
@@ -44,16 +44,41 @@ export default function AnalyticsPage() {
         Every 10¢ roundup goes to the Lofi ocean cleanup initiative when the link is claimed.
       </p>
 
-      <dl className="mt-8 grid gap-8 rounded-4xl bg-frost-light p-6 sm:p-10 md:grid-cols-3 md:gap-6 lg:mt-10">
+      <dl
+        aria-busy={impact.status === "loading"}
+        className="mt-8 grid gap-8 rounded-4xl bg-frost-light p-6 sm:p-10 md:grid-cols-3 md:gap-6 lg:mt-10"
+      >
         {stats.map((stat) => (
           <div key={stat.label} className="min-w-0">
             <dt className="text-sm text-ink/75">{stat.label}</dt>
             <dd>
-              <span className="type-figure mt-2 block text-4xl lg:text-5xl">{stat.value}</span>
+              <span className="type-figure mt-2 block text-4xl [overflow-wrap:anywhere] lg:text-5xl">
+                {stat.value}
+              </span>
               <span className="mt-2 block text-[13px] leading-5 text-ink/75">{stat.note}</span>
             </dd>
           </div>
         ))}
+      </dl>
+
+      <p role="status" className="type-help mt-3">
+        {impact.status === "loading"
+          ? "Reading from Sui…"
+          : impact.status === "unavailable"
+            ? "Sui can’t be reached right now, so these totals aren’t shown."
+            : impact.partial
+              ? "Older claims are still being read, so the real totals are higher."
+              : NETWORK === "testnet"
+                ? "Read from Sui Testnet, where coins have no real value. The gallons show how the count works."
+                : "Read live from Sui. Gallons are an estimate at live prices."}
+      </p>
+
+      <dl className="mt-4">
+        <StatCard
+          label="Your claim rate"
+          value={`${claimRate}%`}
+          note={`${claimedTransfers} of ${totalTransfers} links created in this browser`}
+        />
       </dl>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">

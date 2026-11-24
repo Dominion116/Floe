@@ -179,7 +179,7 @@ export const terms: LegalDoc = {
         <p>
           The roundup is optional and goes to an address set in the contract when a link is claimed.
           We don’t control that address or how its owner spends what it receives, and Floe is not a
-          charity. Impact figures are illustrative, and some are sample data. Don’t assume that a
+          charity. Impact figures are estimates, and totals can be late or incomplete. Don’t assume that a
           roundup is tax deductible.
         </p>
       ),

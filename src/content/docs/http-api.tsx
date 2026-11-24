@@ -5,7 +5,7 @@ export const httpApi: DocPage = {
   slug: "http-api",
   file: "http-api.tsx",
   title: "HTTP API",
-  description: "The two routes the app serves: one sponsors claims, the other returns live prices.",
+  description: "The routes the app serves: claim sponsorship, live prices and water totals.",
   sections: [
     {
       id: "before-you-use",
@@ -164,6 +164,44 @@ const res = await fetch("/api/claim", {
             lang="json"
             code={`{ "error": "Live prices are unavailable" }`}
           />
+        </>
+      ),
+    },
+    {
+      id: "impact",
+      title: "GET /api/impact",
+      keywords: "water donations roundups totals 503",
+      body: (
+        <>
+          <p>
+            Returns what claims have sent to the water treasury. See{" "}
+            <A href="/docs/water#figures">How the totals are counted</A>.
+          </p>
+          <CodeBlock
+            title="200 OK"
+            lang="json"
+            code={`{
+  "donated": { "SUI": "2000000", "LOFI": "0" },
+  "roundups": 2,
+  "claims": 2,
+  "complete": true
+}`}
+          />
+          <DataTable
+            label="GET /api/impact fields"
+            head={["Field", "Type", "Description"]}
+            mono={[0, 1]}
+            rows={[
+              ["donated", "object", "Base units received by the treasury, by token"],
+              ["roundups", "number", "Claims that paid a roundup"],
+              ["claims", "number", "All claims of this contract"],
+              ["complete", "boolean", "False while older claims are still being read"],
+            ]}
+          />
+          <p>
+            Refreshed at most once a minute. If Sui can’t be reached, the last totals are kept for 10
+            minutes. After that it answers 503.
+          </p>
         </>
       ),
     },

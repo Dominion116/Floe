@@ -155,9 +155,6 @@ https://<your domain>/auth`}
           <li>Publish it on mainnet, and set the network, node and package ID together.</li>
           <li>Create mainnet Enoki keys and fund sponsorship.</li>
           <li>
-            Replace the sample water figures on the landing and analytics pages with real ones.
-          </li>
-          <li>
             Have a lawyer review the <A href="/terms">terms</A> and{" "}
             <A href="/privacy">privacy policy</A> for where you operate. Moving money for other people
             can be regulated.
