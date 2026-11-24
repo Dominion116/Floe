@@ -19,6 +19,7 @@
 - ✅ **Lofi Clean Ocean Mission:** Built-in "Round up 10¢ to Clean Water" toggle that directs micro-donations directly to the Lofi Foundation Treasury on-chain.
 - ✅ **Sender Safety Timeout & Clawback:** Automated 14-day escrow expiration enabling senders to cancel and refund unclaimed links atomically.
 - ✅ **Consumer Currency Display:** Real-time dual display in fiat USD (`$10.00`) alongside native `SUI` and `$LOFI` token equivalents.
+- ✅ **Account & Withdraw:** Recipients see their balance and withdraw to any Sui address, with no seed phrase needed.
 - ✅ **Social Share & QR Settlement:** One-tap link sharing for WhatsApp, Telegram, iMessage, and high-contrast dynamic QR codes for in-person payments.
 - 🚧 **Multi-Token Splits & Multi-Claim Pools:** Distribute funds across multiple recipients from a single master link (in development).
 

@@ -7,6 +7,7 @@ const linkClass =
 const PRODUCT_LINKS = [
   { href: "/#demo", label: "Claim demo" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/account", label: "Your account" },
   { href: "/dashboard/analytics", label: "Water impact" },
 ];
 

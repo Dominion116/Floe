@@ -65,20 +65,28 @@ export const claim: DocPage = {
       body: (
         <>
           <p>
-            Floe has no withdraw screen yet, but you can send the money on as a new link, including
-            to yourself:
+            Open <A href="/account">Your account</A> to see your balance, then send it to a friend as
+            a new link or withdraw it to any Sui address.
           </p>
           <ol>
             <li>
-              Choose <strong>Send to a friend</strong> and enter an amount. Leave a little SUI for
-              the network fee, because only claims are sponsored.
+              Choose <strong>Withdraw SUI</strong> and paste the address. For an exchange, use its SUI
+              deposit address on the Sui network.
             </li>
-            <li>Pay from your Google account and copy the new link.</li>
             <li>
-              Open it and choose <strong>Connect Sui wallet</strong> to claim into a wallet you
-              control.
+              Enter an amount, or choose <strong>Withdraw everything</strong>.
             </li>
+            <li>Check the full address, the fee and what arrives, then confirm.</li>
           </ol>
+          <p>
+            Floe refuses addresses that are incomplete, reserved by Sui or the ID of an object or
+            contract. It can’t tell whether an address is the one you meant, and a withdrawal can’t be
+            undone.
+          </p>
+          <p>
+            Only claims are sponsored, so the network fee comes out of the SUI in the account. A
+            balance smaller than the fee can’t be moved until more SUI arrives.
+          </p>
         </>
       ),
     },
@@ -124,9 +132,10 @@ export const claim: DocPage = {
       body: (
         <p>
           Login uses a pop-up, so allow pop-ups for the site. Browsers inside chat apps often block
-          them, and Google refuses to log people in from some of those browsers. Open the link in
-          Safari or Chrome instead, and make sure the whole address moves with you, including the
-          part after the <code>#</code>.
+          them, and Google refuses to log people in from some of those browsers. Use{" "}
+          <strong>Copy link</strong> on the claim page, then paste it into Safari or Chrome. If you
+          don’t see that button, choose <strong>Trouble logging in?</strong> It copies the whole
+          address, including the part after the <code>#</code>.
         </p>
       ),
     },

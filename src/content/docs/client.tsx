@@ -75,6 +75,7 @@ export const client: DocPage = {
             rows={[
               ["readEscrows(ids)", "Map<string, Escrow | null>", "Reads open escrows, 50 at a time"],
               ["readClosed(escrowId)", "Closed | null", "Finds how a deleted escrow ended"],
+              ["findTransaction(digest)", "result | missing | unknown", "Looks up any transaction"],
               ["readCreated(digest)", "CreateOutcome", "Finds what became of a create transaction"],
               ["createdEscrowId(tx)", "string | null", "Gets the escrow ID from a transaction result"],
               ["buildCreate(input)", "Transaction", "Builds a create_escrow call"],
@@ -109,6 +110,35 @@ export const client: DocPage = {
           ),
         },
       ],
+    },
+    {
+      id: "account",
+      title: "Accounts and withdrawals",
+      keywords: "readHoldings buildWithdrawal estimateFee addressProblem parseUnits formatUnits account.ts",
+      body: (
+        <>
+          <p>
+            From <code>src/lib/chain/account.ts</code>.
+          </p>
+          <DataTable
+            label="account.ts exports"
+            head={HEAD}
+            mono={[0, 1]}
+            rows={[
+              ["readHoldings(owner)", "Holding[]", "Balances of the tokens this network supports"],
+              ["buildWithdrawal(withdrawal)", "Transaction", "Builds a transfer, or sends all SUI"],
+              ["estimateFee(withdrawal)", "bigint", "Simulates it with real coins. Throws if it would fail."],
+              ["addressProblem(text, owner)", "string | null", "Why an address looks unsafe"],
+              ["parseUnits(text)", "bigint | null", "Typed amount to base units, exactly"],
+              ["formatUnits(units)", "string", "Base units to text, with every digit"],
+            ]}
+          />
+          <p>
+            <code>readHoldings</code>, <code>estimateFee</code> and <code>addressProblem</code> return
+            promises.
+          </p>
+        </>
+      ),
     },
     {
       id: "create-example",

@@ -11,6 +11,7 @@ import { Wallet } from "lucide-react";
 import { ClaimProgress } from "@/components/claim/ClaimProgress";
 import { ClaimSkeleton } from "@/components/claim/ClaimSkeleton";
 import { EnvelopeCard } from "@/components/claim/EnvelopeCard";
+import { OpenInBrowser } from "@/components/claim/OpenInBrowser";
 import { PostClaimView } from "@/components/claim/PostClaimView";
 import { GoogleIcon } from "@/components/ui/BrandIcons";
 import { celebrate } from "@/lib/celebrate";
@@ -26,6 +27,7 @@ import {
   type Escrow,
 } from "@/lib/chain/escrow";
 import { parseClaimFragment } from "@/lib/crypto";
+import { detectInAppBrowser } from "@/lib/inAppBrowser";
 import type { ClaimVerificationState } from "@/lib/types";
 
 type View =
@@ -71,6 +73,9 @@ export default function ClaimFlow() {
   const [step, setStep] = useState<ClaimVerificationState["step"]>("idle");
   const [error, setError] = useState<string | null>(null);
   const [showWallets, setShowWallets] = useState(false);
+  // This component only renders in the browser, so it can look straight away.
+  const [inApp] = useState(detectInAppBrowser);
+  const [showLoginHelp, setShowLoginHelp] = useState(false);
   const [receipt, setReceipt] = useState<{ digest: string; recipient: string } | null>(null);
 
   const load = useCallback(async () => {
@@ -142,10 +147,12 @@ export default function ClaimFlow() {
     if (!ENOKI) return;
     setError(null);
     setStep("authenticating");
+    let loggedIn = false;
     try {
       const { accounts } = await dAppKit.connectWallet({ wallet });
       const recipient = accounts[0]?.address;
       if (!recipient) throw new ClaimError("No account was shared. Try again.");
+      loggedIn = true;
 
       const attempt = async () => {
         setStep("verifying");
@@ -175,6 +182,10 @@ export default function ClaimFlow() {
       celebrate();
     } catch (err) {
       setStep("idle");
+      // An expired session asks for the pop-up again later, when signing.
+      if (isGoogleWallet(wallet) && (!loggedIn || /popup/i.test(String(err)))) {
+        setShowLoginHelp(true);
+      }
       setError(
         err instanceof ClaimError
           ? err.message
@@ -225,6 +236,8 @@ export default function ClaimFlow() {
             </p>
           )}
 
+          {ENOKI && (inApp || showLoginHelp) && <OpenInBrowser app={inApp} />}
+
           <div className="space-y-3 pt-2">
             <button
               type="button"
@@ -273,6 +286,15 @@ export default function ClaimFlow() {
               ? "You pay no gas and need no seed phrase."
               : "Login isn’t set up on this site yet, so this link can’t be claimed here."}
           </p>
+          {ENOKI && !inApp && !showLoginHelp && (
+            <button
+              type="button"
+              onClick={() => setShowLoginHelp(true)}
+              className="btn btn-sm btn-ghost w-full"
+            >
+              Trouble logging in?
+            </button>
+          )}
         </>
       )}
 

@@ -76,6 +76,30 @@ export const troubleshooting: DocPage = {
           ),
         },
         {
+          id: "withdraw-fee",
+          title: "That leaves too little for the network fee",
+          keywords: "withdraw everything insufficient gas",
+          body: (
+            <p>
+              Choose <strong>Withdraw everything</strong>, which takes the fee out of the amount, or
+              enter less. If it says there isn’t enough to cover the fee, the account needs more SUI
+              first.
+            </p>
+          ),
+        },
+        {
+          id: "wrong-google-account",
+          title: "My balance is zero after logging in",
+          keywords: "different google account empty",
+          body: (
+            <p>
+              You may have chosen a different Google account, or claimed with a wallet. Log out on{" "}
+              <A href="/account">Your account</A> and try the one you claimed with. Compare the address
+              with the one on your claim receipt.
+            </p>
+          ),
+        },
+        {
           id: "statuses-old",
           title: "Statuses may be out of date",
           keywords: "unable to reach sui",
