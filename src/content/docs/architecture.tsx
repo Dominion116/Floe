@@ -105,6 +105,18 @@ export const architecture: DocPage = {
       ),
     },
     {
+      id: "withdraw-flow",
+      title: "Withdrawing",
+      keywords: "account transfer balance",
+      body: (
+        <p>
+          The account page sends a plain transfer from the browser and pays its own gas, so it doesn’t
+          touch the contract or a Floe server. It is built and simulated first to check that it can be
+          afforded. Like a create, it is signed once, and only those same bytes are ever sent again.
+        </p>
+      ),
+    },
+    {
       id: "escrow-life",
       title: "The life of an escrow",
       keywords: "state machine lifecycle",

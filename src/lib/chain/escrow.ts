@@ -158,24 +158,29 @@ export type CreateOutcome =
   /** The node couldn't be asked. Never treat as failure. */
   | { status: "unknown" };
 
-/** What became of a create transaction. */
-export async function readCreated(digest: string): Promise<CreateOutcome> {
+/**
+ * Looks a transaction up by digest. `missing` means the network answered and doesn't have it (yet).
+ * `unknown` means it couldn't be asked, and must never be treated as failure.
+ */
+export async function findTransaction(digest: string) {
   // The full node has it first, and history has it longest. Only both can say it's missing.
   let missing = 0;
   for (const source of [suiClient.core, history]) {
     try {
-      const result = await source.getTransaction({
-        digest,
-        include: { effects: true, objectTypes: true },
-      });
-      if (result.FailedTransaction) return { status: "failed" };
-      const escrowId = createdEscrowId(result.Transaction);
-      return escrowId ? { status: "created", escrowId } : { status: "failed" };
+      return await source.getTransaction({ digest, include: { effects: true, objectTypes: true } });
     } catch (err) {
       if (err instanceof Error && /not found/i.test(err.message)) missing++;
     }
   }
-  return { status: missing === 2 ? "missing" : "unknown" };
+  return missing === 2 ? "missing" : "unknown";
+}
+
+/** What became of a create transaction. */
+export async function readCreated(digest: string): Promise<CreateOutcome> {
+  const result = await findTransaction(digest);
+  if (result === "missing" || result === "unknown") return { status: result };
+  const escrowId = result.Transaction && createdEscrowId(result.Transaction);
+  return escrowId ? { status: "created", escrowId } : { status: "failed" };
 }
 
 interface CreatedTransaction {
@@ -272,6 +277,7 @@ export async function buildClaim(
 /** A short explanation for the person, without leaking raw node output. */
 export function chainErrorMessage(err: unknown, fallback: string): string {
   const text = err instanceof Error ? err.message : String(err);
+  if (/popup closed/i.test(text)) return "The login window closed before you finished.";
   if (/reject|denied|cancel|closed/i.test(text)) return "The request was cancelled.";
   if (/popup/i.test(text)) return "Your browser blocked the login window. Allow pop-ups, then try again.";
   if (/insufficient|not enough|balance.*(low|too)|no valid gas/i.test(text)) {

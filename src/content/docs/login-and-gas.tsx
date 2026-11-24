@@ -66,8 +66,8 @@ export const loginAndGas: DocPage = {
           </p>
           <Callout kind="warning" title="On a shared device">
             <p>
-              Log out when you finish. Start creating a link, go to the review step and choose{" "}
-              <strong>Change</strong> next to the account, or clear this site’s data.
+              Open <A href="/account">Your account</A> and choose <strong>Log out</strong> when you
+              finish.
             </p>
           </Callout>
         </>
@@ -86,7 +86,7 @@ export const loginAndGas: DocPage = {
               ["Create a link", "The sender"],
               ["Claim a link, with Google or a wallet", "Floe’s sponsor, through Enoki"],
               ["Refund a link", "The sender"],
-              ["Send money on as a new link", "Whoever sends it"],
+              ["Withdraw, or send money on as a new link", "Whoever sends it"],
             ]}
           />
           <p>

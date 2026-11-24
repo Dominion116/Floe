@@ -133,6 +133,7 @@ https://<your domain>/auth`}
           <li>Create a small link from a testnet wallet.</li>
           <li>Open it in a private window and claim it with Google.</li>
           <li>Check that the dashboard shows it as claimed.</li>
+          <li>On the account page, withdraw it to another address.</li>
           <li>Create a second link, and refund it.</li>
           <li>
             If the roundup was on, find its transfer to the treasury in the claim transaction.
@@ -147,6 +148,10 @@ https://<your domain>/auth`}
       body: (
         <ul>
           <li>Have the contract audited.</li>
+          <li>
+            Decide how people who hold only $LOFI will pay to withdraw it. If you sponsor that, limit it
+            so it can’t drain your gas budget.
+          </li>
           <li>Publish it on mainnet, and set the network, node and package ID together.</li>
           <li>Create mainnet Enoki keys and fund sponsorship.</li>
           <li>
