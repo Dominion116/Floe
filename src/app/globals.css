@@ -38,6 +38,10 @@
   --theme-water-rgb: 219 241 246;
   --theme-water-accent-rgb: 87 178 197;
 
+  /* Code in the docs, at least 4.5:1 on snow */
+  --code-keyword-rgb: 63 78 160;
+  --code-string-rgb: 14 110 60;
+
   /* Third-party brand marks */
   --brand-google-blue: #4285f4;
   --brand-google-green: #34a853;
@@ -277,6 +281,37 @@
   /* The sheet is white even when its header sits on the dark hero */
   .menu-sheet :focus-visible {
     outline-color: var(--color-ink);
+  }
+
+  /* Long-form text: docs and legal pages */
+  .doc {
+    @apply text-base leading-relaxed text-ink-muted;
+  }
+  .doc > * + * {
+    margin-top: 1rem;
+  }
+  .doc strong {
+    @apply font-medium text-ink;
+  }
+  .doc p a,
+  .doc li a,
+  .doc td a,
+  .doc th a {
+    @apply text-ink underline decoration-mist-dark underline-offset-4 hover:decoration-ink rounded-sm;
+  }
+  .doc ul,
+  .doc ol {
+    @apply space-y-2 pl-5;
+  }
+  .doc ul {
+    list-style: disc;
+  }
+  .doc ol {
+    list-style: decimal;
+  }
+  .doc :not(pre) > code {
+    @apply rounded bg-mist-light px-1 py-0.5 font-mono text-[0.875em] text-ink;
+    overflow-wrap: anywhere;
   }
 
   .skip-link {

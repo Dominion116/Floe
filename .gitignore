@@ -24,7 +24,6 @@ yarn-error.log*
 
 # local env files
 .env*.local
-.env
 !.env.example
 
 # vercel
@@ -35,3 +34,4 @@ yarn-error.log*
 
 # Move contract build artifacts
 move/build/
+config.bat
