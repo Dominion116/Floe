@@ -13,7 +13,12 @@ const NAV_LINKS = [
   { href: "/#demo", label: "Claim demo" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/dashboard/analytics", label: "Water impact" },
+  { href: "/docs", label: "Docs" },
 ];
+
+/** Every docs page counts as Docs. */
+const isCurrent = (href: string, pathname: string) =>
+  pathname === href || (href === "/docs" && pathname.startsWith("/docs/"));
 
 function Wordmark({ onClick, light }: { onClick?: () => void; light?: boolean }) {
   return (
@@ -55,7 +60,7 @@ export function Navbar({ overlay = false }: { overlay?: boolean }) {
 
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive = isCurrent(link.href, pathname);
             return (
               <Link
                 key={link.href}
@@ -119,7 +124,7 @@ export function Navbar({ overlay = false }: { overlay?: boolean }) {
                     <Link
                       href={link.href}
                       onClick={closeMenu}
-                      aria-current={pathname === link.href ? "page" : undefined}
+                      aria-current={isCurrent(link.href, pathname) ? "page" : undefined}
                       className="type-title flex min-h-[52px] items-center rounded-lg aria-[current=page]:underline aria-[current=page]:underline-offset-8"
                     >
                       {link.label}

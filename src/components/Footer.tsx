@@ -10,6 +10,12 @@ const PRODUCT_LINKS = [
   { href: "/dashboard/analytics", label: "Water impact" },
 ];
 
+const RESOURCE_LINKS = [
+  { href: "/docs", label: "Documentation" },
+  { href: "/privacy", label: "Privacy policy" },
+  { href: "/terms", label: "Terms of service" },
+];
+
 const ECOSYSTEM_LINKS = [
   { href: "https://hackathon.lofitheyeti.com/", label: "Lofi the Yeti hackathon" },
   { href: "https://sui.io", label: "Sui Network" },
@@ -23,8 +29,8 @@ export function Footer() {
   return (
     <footer className="mt-auto border-t border-mist/60 bg-white">
       <div className="container-standard pt-12 pb-8 lg:pt-16">
-        <div className="grid grid-cols-1 gap-10 min-[480px]:grid-cols-2 md:grid-cols-4">
-          <div className="min-[480px]:col-span-2">
+        <div className="grid grid-cols-1 gap-10 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div className="min-[480px]:col-span-2 md:col-span-3 lg:col-span-2">
             <Link
               href="/"
               aria-label="Floe home"
@@ -47,6 +53,21 @@ export function Footer() {
                 <CreateLinkButton className={linkClass}>Create a payment link</CreateLinkButton>
               </li>
               {PRODUCT_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className={linkClass}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-labelledby="footer-resources">
+            <h2 id="footer-resources" className="mb-2 text-sm font-medium text-ink">
+              Resources
+            </h2>
+            <ul>
+              {RESOURCE_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className={linkClass}>
                     {link.label}
