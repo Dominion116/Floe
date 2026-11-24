@@ -21,6 +21,9 @@ export const claim: DocPage = {
             Wait while Floe shows <em>Authenticating</em>, <em>Verifying</em> and <em>Claiming</em>.
           </li>
           <li>
+            If there’s a <A href="/docs/gifts">gift inside</A>, choose <strong>Open your gift</strong>.
+          </li>
+          <li>
             The final screen shows the amount, your Sui address and a link to the transaction on a
             public explorer.
           </li>

@@ -11,6 +11,7 @@ import { Wallet } from "lucide-react";
 import { ClaimProgress } from "@/components/claim/ClaimProgress";
 import { ClaimSkeleton } from "@/components/claim/ClaimSkeleton";
 import { EnvelopeCard } from "@/components/claim/EnvelopeCard";
+import { GiftReveal } from "@/components/claim/GiftReveal";
 import { OpenInBrowser } from "@/components/claim/OpenInBrowser";
 import { PostClaimView } from "@/components/claim/PostClaimView";
 import { GoogleIcon } from "@/components/ui/BrandIcons";
@@ -30,10 +31,15 @@ import { parseClaimFragment } from "@/lib/crypto";
 import { detectInAppBrowser } from "@/lib/inAppBrowser";
 import type { ClaimVerificationState } from "@/lib/types";
 
+interface LinkGift {
+  giftId: string;
+  privateKey: string;
+}
+
 type View =
   | { kind: "loading" }
-  | { kind: "problem"; title: string; body: string; retry?: boolean }
-  | { kind: "ready"; escrow: Escrow; privateKey: string; note: string };
+  | { kind: "problem"; title: string; body: string; retry?: boolean; gift?: LinkGift }
+  | { kind: "ready"; escrow: Escrow; privateKey: string; note: string; giftId: string | null };
 
 /** Thrown with copy that is safe to show. */
 class ClaimError extends Error {
@@ -90,7 +96,7 @@ export default function ClaimFlow() {
       return;
     }
 
-    const { privateKey, note } = parseClaimFragment(window.location.hash);
+    const { privateKey, note, giftId } = parseClaimFragment(window.location.hash);
     if (!isValidSuiObjectId(escrowId) || !privateKey) {
       setView({
         kind: "problem",
@@ -117,6 +123,8 @@ export default function ClaimFlow() {
             closed?.kind === "claimed"
               ? "If that wasn’t you, ask the sender who else has the link."
               : "Ask the sender for a new link.",
+          // Their receipt is gone, but the link still opens the gift.
+          gift: closed?.kind === "claimed" && giftId ? { giftId, privateKey } : undefined,
         });
         return;
       }
@@ -128,7 +136,7 @@ export default function ClaimFlow() {
         });
         return;
       }
-      setView({ kind: "ready", escrow, privateKey, note });
+      setView({ kind: "ready", escrow, privateKey, note, giftId });
     } catch {
       setView({
         kind: "problem",
@@ -201,6 +209,11 @@ export default function ClaimFlow() {
       <div className="mx-auto flex max-w-md flex-col items-center py-12 text-center lg:py-20">
         <h1 className="type-headline">{view.title}</h1>
         <p className="type-lede mt-4">{view.body}</p>
+        {view.gift && (
+          <div className="mt-8 w-full">
+            <GiftReveal {...view.gift} />
+          </div>
+        )}
         {view.retry ? (
           <button type="button" onClick={() => void load()} className="btn btn-primary mt-8">
             Try again
@@ -214,7 +227,7 @@ export default function ClaimFlow() {
     );
   }
 
-  const { escrow, privateKey, note } = view;
+  const { escrow, privateKey, note, giftId } = view;
   const amount = fromUnits(escrow.amountUnits);
 
   return (
@@ -228,6 +241,7 @@ export default function ClaimFlow() {
             recipientNote={note}
             themeId={escrow.themeId}
             hasWaterDonation={escrow.waterUnits > BigInt(0)}
+            hasGift={giftId !== null}
           />
 
           {error && (
@@ -309,6 +323,7 @@ export default function ClaimFlow() {
           recipientAddress={receipt.recipient}
           txDigest={receipt.digest}
           hasWaterDonation={escrow.waterUnits > BigInt(0)}
+          gift={giftId ? { giftId, privateKey } : null}
         />
       )}
     </div>

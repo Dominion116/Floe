@@ -45,6 +45,8 @@ export interface PaymentLinkRecord {
   recipientNote: string;
   themeId: CardThemeId;
   hasWaterDonation: boolean;
+  /** Only whether there was one. The gift and where it is stored stay in the link. */
+  hasGift?: boolean;
   createdAt: number;
   expiresAt: number;
   status: EscrowStatus;

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Droplet, ExternalLink } from "lucide-react";
+import { Droplet, ExternalLink, Gift } from "lucide-react";
 import { LiveValue } from "@/components/ui/LiveValue";
 import { explorerAccountUrl, explorerTxUrl } from "@/lib/chain/config";
 import { fromUnits } from "@/lib/chain/escrow";
@@ -84,6 +84,12 @@ export function LinkCard({ link, onClawbackClick }: LinkCardProps) {
       </div>
       {link.recipientNote && (
         <p className="mt-2 text-base text-ink [overflow-wrap:anywhere]">{link.recipientNote}</p>
+      )}
+      {link.hasGift && (
+        <p className="type-help mt-1 flex items-center gap-1.5">
+          <Gift className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Photo or voice note inside
+        </p>
       )}
       {link.hasWaterDonation && (
         <p className="type-help mt-1 flex items-center gap-1.5">

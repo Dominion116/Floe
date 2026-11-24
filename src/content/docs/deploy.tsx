@@ -149,6 +149,10 @@ https://<your domain>/auth`}
         <ul>
           <li>Have the contract audited.</li>
           <li>
+            Run a Walrus publisher if you want gifts. There is no public one on mainnet, so protect
+            yours from abuse.
+          </li>
+          <li>
             Decide how people who hold only $LOFI will pay to withdraw it. If you sponsor that, limit it
             so it can’t drain your gas budget.
           </li>

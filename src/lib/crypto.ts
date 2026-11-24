@@ -1,5 +1,6 @@
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { toHex } from "@mysten/sui/utils";
+import { isBlobId } from "./walrus";
 
 export interface EphemeralKeys {
   privateKey: string;
@@ -21,26 +22,37 @@ export function generateEphemeralKeypair(): EphemeralKeys {
 }
 
 /**
- * Builds the shareable link. The key and the note sit in the hash fragment (#),
- * which browsers never send to a server.
+ * Builds the shareable link. The key, the note and the gift's blob ID sit in the hash
+ * fragment (#), which browsers never send to a server.
  */
 export function buildClaimUrl(
   baseUrl: string,
   escrowId: string,
   privateKey: string,
-  note = ""
+  note = "",
+  giftId = ""
 ): string {
   const cleanBase = baseUrl.replace(/\/+$/, "");
   const fragment = new URLSearchParams({ k: privateKey });
   if (note) fragment.set("n", note);
+  if (giftId) fragment.set("g", giftId);
   return `${cleanBase}/claim?id=${encodeURIComponent(escrowId)}#${fragment}`;
 }
 
-/** Reads the key and note from window.location.hash, in the browser only. */
-export function parseClaimFragment(hash: string): { privateKey: string | null; note: string } {
+export interface ClaimFragment {
+  privateKey: string | null;
+  note: string;
+  /** Where the gift is stored, if there is one. */
+  giftId: string | null;
+}
+
+/** Reads the fragment from window.location.hash, in the browser only. */
+export function parseClaimFragment(hash: string): ClaimFragment {
   const params = new URLSearchParams(hash.replace(/^#/, ""));
+  const giftId = params.get("g");
   return {
     privateKey: params.get("k"),
     note: (params.get("n") ?? "").slice(0, MAX_NOTE_LENGTH),
+    giftId: isBlobId(giftId) ? giftId : null,
   };
 }

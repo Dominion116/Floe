@@ -36,7 +36,7 @@ COINGECKO_API_KEY=""`}
       id: "public-variables",
       title: "Public variables",
       keywords:
-        "NEXT_PUBLIC_SUI_NETWORK NEXT_PUBLIC_SUI_RPC_URL NEXT_PUBLIC_FLOE_PACKAGE_ID NEXT_PUBLIC_GOOGLE_CLIENT_ID NEXT_PUBLIC_ENOKI_API_KEY NEXT_PUBLIC_APP_URL NEXT_PUBLIC_CONTACT_EMAIL",
+        "NEXT_PUBLIC_SUI_NETWORK NEXT_PUBLIC_SUI_RPC_URL NEXT_PUBLIC_FLOE_PACKAGE_ID NEXT_PUBLIC_GOOGLE_CLIENT_ID NEXT_PUBLIC_ENOKI_API_KEY NEXT_PUBLIC_APP_URL NEXT_PUBLIC_CONTACT_EMAIL NEXT_PUBLIC_WALRUS_PUBLISHER NEXT_PUBLIC_WALRUS_AGGREGATOR",
       body: (
         <>
           <p>These are compiled into the browser code, so anyone can read them.</p>
@@ -69,6 +69,16 @@ COINGECKO_API_KEY=""`}
                 "NEXT_PUBLIC_ENOKI_API_KEY",
                 "Enoki public key, with zkLogin on",
                 "Login and claiming are off",
+              ],
+              [
+                "NEXT_PUBLIC_WALRUS_PUBLISHER",
+                "Where gifts are stored. Separate several with commas, in the order to try.",
+                "Public publishers on testnet. No gifts on mainnet.",
+              ],
+              [
+                "NEXT_PUBLIC_WALRUS_AGGREGATOR",
+                "Where gifts are read. Separate several with commas.",
+                "A public aggregator on testnet. No gifts on mainnet.",
               ],
               [
                 "NEXT_PUBLIC_APP_URL",

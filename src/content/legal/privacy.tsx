@@ -36,7 +36,7 @@ export const privacy: LegalDoc = {
       title: "What we don’t collect",
       body: (
         <ul>
-          <li>The private key in a payment link, or the note beside it</li>
+          <li>The private key in a payment link, the note beside it, or a photo or voice gift</li>
           <li>Your Google email, name, photo, contacts or password</li>
           <li>Seed phrases, or the keys of your wallet</li>
           <li>Analytics, advertising identifiers or cross-site tracking</li>
@@ -179,12 +179,39 @@ export const privacy: LegalDoc = {
                 "A request from our server, with nothing about you",
               ],
               [
+                "Walrus publishers and aggregators",
+                "You add or open a photo or voice gift",
+                "The encrypted gift, which they can’t open, and its ID",
+              ],
+              [
                 "Suiscan",
                 "You follow an explorer link",
                 "The address or transaction you open",
               ],
             ]}
           />
+        </>
+      ),
+    },
+    {
+      id: "gifts",
+      title: "Photo and voice gifts",
+      body: (
+        <>
+          <p>
+            Your browser uses the camera, photos or microphone only when you choose to add a gift, and
+            the microphone stops when you finish recording. Photos are redrawn first, which removes
+            their location and other hidden details.
+          </p>
+          <p>
+            The gift is encrypted on your device, then stored on Walrus, a public storage network run by
+            independent operators. Anyone can download the encrypted bytes and see their size, but
+            opening them needs the full link. We can’t open, recover or delete a gift. Storage is paid
+            for about 20 days on testnet, and copies may last longer.
+          </p>
+          <p>
+            Get permission before sending a photo or recording of someone else.
+          </p>
         </>
       ),
     },

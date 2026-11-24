@@ -39,13 +39,13 @@ export const client: DocPage = {
                 "Makes a new Ed25519 keypair in memory",
               ],
               [
-                "buildClaimUrl(baseUrl, escrowId, privateKey, note?)",
+                "buildClaimUrl(baseUrl, escrowId, privateKey, note?, giftId?)",
                 "string",
-                "Builds the link, with the key and note in the fragment",
+                "Builds the link, with the key, note and gift ID in the fragment",
               ],
               [
                 "parseClaimFragment(hash)",
-                "{ privateKey, note }",
+                "{ privateKey, note, giftId }",
                 "Reads the fragment. The note is cut to 60 characters.",
               ],
               ["MAX_NOTE_LENGTH", "60", "The longest note"],
@@ -53,7 +53,7 @@ export const client: DocPage = {
           />
           <CodeBlock
             title="Link format"
-            code={`<base>/claim?id=<escrow ID>#k=<private key>&n=<note>`}
+            code={`<base>/claim?id=<escrow ID>#k=<private key>&n=<note>&g=<gift blob ID>`}
           />
         </>
       ),
@@ -136,6 +136,35 @@ export const client: DocPage = {
           <p>
             <code>readHoldings</code>, <code>estimateFee</code> and <code>addressProblem</code> return
             promises.
+          </p>
+        </>
+      ),
+    },
+    {
+      id: "gifts",
+      title: "Gifts and Walrus",
+      keywords: "sealGift openGift giftMime storeBlob readBlob GIFTS_ENABLED walrus.ts gift.ts",
+      body: (
+        <>
+          <p>
+            From <code>src/lib/gift.ts</code> and <code>src/lib/walrus.ts</code>.
+          </p>
+          <DataTable
+            label="Gift exports"
+            head={HEAD}
+            mono={[0, 1]}
+            rows={[
+              ["sealGift(gift, privateKey)", "Uint8Array", "Encrypts a gift with the link’s key"],
+              ["openGift(blob, privateKey)", "Gift", "Decrypts it. Throws if anything is off."],
+              ["giftMime(bytes)", "GiftMime | null", "What the bytes really are"],
+              ["storeBlob(blob, signal?)", "string", "Stores bytes and returns the blob ID"],
+              ["readBlob(id)", "Uint8Array", "Reads bytes, up to the size limit"],
+              ["GIFTS_ENABLED", "boolean", "Whether this site can store and read gifts"],
+            ]}
+          />
+          <p>
+            All but <code>giftMime</code> and <code>GIFTS_ENABLED</code> return promises. A sealed gift
+            is a 12-byte IV, then the encrypted version byte, type byte and content.
           </p>
         </>
       ),
@@ -227,6 +256,7 @@ const url = buildClaimUrl(
                 ["recipientNote", "string", "The note"],
                 ["themeId", "CardThemeId", "The envelope"],
                 ["hasWaterDonation", "boolean", "Whether the roundup was on"],
+                ["hasGift", "boolean?", "Whether it had a gift. Not what or where."],
                 ["createdAt", "number", "Milliseconds since 1970"],
                 ["expiresAt", "number", "Milliseconds since 1970"],
                 ["status", "EscrowStatus", "creating, pending, claimed, expired or reclaimed"],
