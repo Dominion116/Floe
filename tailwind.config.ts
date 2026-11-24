@@ -25,6 +25,7 @@ const config: Config = {
           fill: token("danger-fill"),
           solid: token("danger-solid"),
         },
+        code: { keyword: token("code-keyword"), string: token("code-string") },
         theme: {
           glacial: { DEFAULT: token("theme-glacial"), accent: token("theme-glacial-accent") },
           coffee: { DEFAULT: token("theme-coffee"), accent: token("theme-coffee-accent") },
