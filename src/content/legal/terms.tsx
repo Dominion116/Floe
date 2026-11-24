@@ -1,7 +1,7 @@
 import { A, Callout } from "@/components/docs/Blocks";
 import type { LegalDoc } from "@/content/types";
 import { NETWORK } from "@/lib/chain/config";
-import { ISSUES_URL, REPO_URL } from "@/lib/site";
+import { CONTACT_EMAIL, ISSUES_URL, REPO_URL } from "@/lib/site";
 
 const onTestnet = NETWORK !== "mainnet";
 
@@ -324,7 +324,12 @@ export const terms: LegalDoc = {
     {
       id: "contact",
       title: "Contact",
-      body: (
+      body: CONTACT_EMAIL ? (
+        <p>
+          Email <A href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</A>. Never include a payment link. Anyone
+          who reads it can take the money.
+        </p>
+      ) : (
         <p>
           Open an issue on <A href={ISSUES_URL}>GitHub</A>. Issues are public, so never include a
           payment link or personal details.

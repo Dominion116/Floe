@@ -1,6 +1,6 @@
 import { A, CodeBlock } from "@/components/docs/Blocks";
 import type { DocPage } from "@/content/types";
-import { ISSUES_URL } from "@/lib/site";
+import { CONTACT_EMAIL, ISSUES_URL } from "@/lib/site";
 
 export const troubleshooting: DocPage = {
   slug: "troubleshooting",
@@ -215,7 +215,13 @@ export const troubleshooting: DocPage = {
     {
       id: "get-help",
       title: "Get help",
-      body: (
+      body: CONTACT_EMAIL ? (
+        <p>
+          Email <A href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</A> with what you did, what you expected
+          and the transaction digest if there is one. Never paste a claim link. Anyone who reads it
+          can take the money.
+        </p>
+      ) : (
         <p>
           Open an issue on <A href={ISSUES_URL}>GitHub</A> with what you did, what you expected and
           the transaction digest if there is one. Never paste a claim link. Anyone who reads it can

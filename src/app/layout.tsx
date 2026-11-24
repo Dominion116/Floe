@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import { Providers } from "@/components/Providers";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,19 +24,13 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Floe: send money with a link",
   description:
     "Send money with a link. No wallet needed. They click, log in with Google, and the money is theirs.",
-  icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
-  },
-  openGraph: {
-    title: "Floe: send money with a link",
-    description: "Send money with a link. No wallet needed.",
-    type: "website",
-  },
+  // Each page's own title and description fill in the rest.
+  openGraph: { type: "website", siteName: "Floe" },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

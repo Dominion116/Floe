@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
+
+export const metadata: Metadata = {
+  title: "Page not found · Floe",
+  description: "This link may have expired, been claimed already, or been typed incorrectly.",
+};
 
 export default function NotFound() {
   return (

@@ -5,6 +5,7 @@ import { terms } from "@/content/legal/terms";
 export const metadata: Metadata = {
   title: "Terms of service · Floe",
   description: "The rules for creating, sharing, claiming and refunding Floe payment links.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

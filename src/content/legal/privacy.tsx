@@ -1,6 +1,6 @@
 import { A, Callout, DataTable } from "@/components/docs/Blocks";
 import type { LegalDoc } from "@/content/types";
-import { ISSUES_URL, REPO_URL } from "@/lib/site";
+import { CONTACT_EMAIL, ISSUES_URL, REPO_URL } from "@/lib/site";
 
 export const privacy: LegalDoc = {
   title: "Privacy policy",
@@ -179,11 +179,6 @@ export const privacy: LegalDoc = {
                 "A request from our server, with nothing about you",
               ],
               [
-                "Watermelon",
-                "You open the home page",
-                "A request for the background image",
-              ],
-              [
                 "Suiscan",
                 "You follow an explorer link",
                 "The address or transaction you open",
@@ -319,7 +314,12 @@ export const privacy: LegalDoc = {
     {
       id: "contact",
       title: "Contact",
-      body: (
+      body: CONTACT_EMAIL ? (
+        <p>
+          Email <A href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</A>. Never include a payment link. Anyone
+          who reads it can take the money.
+        </p>
+      ) : (
         <p>
           Open an issue on <A href={ISSUES_URL}>GitHub</A>. Issues are public, so don’t include
           personal details or a payment link. Say that your question is private, and we’ll arrange

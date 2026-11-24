@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { StepsSection } from "@/components/landing/StepsSection";
@@ -5,6 +6,8 @@ import { LiveDemoSection } from "@/components/landing/LiveDemoSection";
 import { WaterImpactSection } from "@/components/landing/WaterImpactSection";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { ClosingCtaSection } from "@/components/landing/ClosingCtaSection";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function HomePage() {
   return (

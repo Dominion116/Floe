@@ -36,7 +36,7 @@ COINGECKO_API_KEY=""`}
       id: "public-variables",
       title: "Public variables",
       keywords:
-        "NEXT_PUBLIC_SUI_NETWORK NEXT_PUBLIC_SUI_RPC_URL NEXT_PUBLIC_FLOE_PACKAGE_ID NEXT_PUBLIC_GOOGLE_CLIENT_ID NEXT_PUBLIC_ENOKI_API_KEY NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_SUI_NETWORK NEXT_PUBLIC_SUI_RPC_URL NEXT_PUBLIC_FLOE_PACKAGE_ID NEXT_PUBLIC_GOOGLE_CLIENT_ID NEXT_PUBLIC_ENOKI_API_KEY NEXT_PUBLIC_APP_URL NEXT_PUBLIC_CONTACT_EMAIL",
       body: (
         <>
           <p>These are compiled into the browser code, so anyone can read them.</p>
@@ -69,6 +69,16 @@ COINGECKO_API_KEY=""`}
                 "NEXT_PUBLIC_ENOKI_API_KEY",
                 "Enoki public key, with zkLogin on",
                 "Login and claiming are off",
+              ],
+              [
+                "NEXT_PUBLIC_APP_URL",
+                "The site’s address, for link previews, robots.txt and the sitemap",
+                "https://floeonsui.vercel.app",
+              ],
+              [
+                "NEXT_PUBLIC_CONTACT_EMAIL",
+                "A monitored address, shown in the footer, policies and docs",
+                "People are sent to public GitHub issues",
               ],
             ]}
           />
@@ -114,8 +124,8 @@ COINGECKO_API_KEY=""`}
             <code>mainnet</code> as testnet.
           </li>
           <li>
-            <code>NEXT_PUBLIC_APP_URL</code> appears in <code>.env.example</code>, but the app doesn’t
-            read it. Links use the address the sender is on.
+            Claim links don’t use <code>NEXT_PUBLIC_APP_URL</code>. They use the address the sender is
+            on.
           </li>
           <li>
             The GraphQL endpoint follows the network and can’t be set separately.

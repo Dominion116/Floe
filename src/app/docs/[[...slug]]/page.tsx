@@ -23,7 +23,11 @@ const findPage = (slug: string[] = []) => DOC_PAGES.findIndex((p) => p.slug === 
 export async function generateMetadata({ params }: DocsPageProps): Promise<Metadata> {
   const page = DOC_PAGES[findPage((await params).slug)];
   if (!page) return {};
-  return { title: `${page.title} · Floe docs`, description: page.description };
+  return {
+    title: `${page.title} · Floe docs`,
+    description: page.description,
+    alternates: { canonical: hrefOf(page) },
+  };
 }
 
 export default async function DocsPage({ params }: DocsPageProps) {

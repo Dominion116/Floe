@@ -130,6 +130,7 @@ export function DataTable({ label, head, rows, mono = [] }: DataTableProps) {
 /** In-site links stay in the app. Everything else opens in a new tab. */
 export function A({ href, children }: { href: string; children: ReactNode }) {
   if (href.startsWith("/") || href.startsWith("#")) return <Link href={href}>{children}</Link>;
+  if (href.startsWith("mailto:")) return <a href={href}>{children}</a>;
   return (
     <a href={href} target="_blank" rel="noopener noreferrer">
       {children}

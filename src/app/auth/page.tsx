@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Finishing login · Floe",
+  description: "Finishing your Google login.",
+  robots: { index: false },
+};
+
 /** Where the Google login pop-up lands. The page that opened it reads the result and closes it. */
 export default function AuthPage() {
   return (

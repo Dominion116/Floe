@@ -8,7 +8,7 @@ export function HeroSection() {
     <div className="on-dark relative flex min-h-svh flex-col overflow-hidden bg-ink">
       <div className="pointer-events-none absolute inset-0 select-none" aria-hidden="true">
         <img
-          src="https://assets.watermelon.sh/bg-hero-38.avif"
+          src="/hero.avif"
           alt=""
           fetchPriority="high"
           className="h-full w-full object-cover object-bottom"

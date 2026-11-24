@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
+import { CONTACT_EMAIL, ISSUES_URL } from "@/lib/site";
 
 const linkClass =
   "inline-flex min-h-[44px] md:min-h-[32px] items-center rounded-sm text-sm text-ink-muted hover:text-ink transition-colors duration-150";
@@ -75,6 +76,14 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <a
+                  href={CONTACT_EMAIL ? `mailto:${CONTACT_EMAIL}` : ISSUES_URL}
+                  className={linkClass}
+                >
+                  Contact
+                </a>
+              </li>
             </ul>
           </nav>
 

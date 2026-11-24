@@ -5,6 +5,7 @@ import { privacy } from "@/content/legal/privacy";
 export const metadata: Metadata = {
   title: "Privacy policy · Floe",
   description: "What Floe stores, what it never sees, and which services are involved in a payment.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

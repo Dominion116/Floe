@@ -1,6 +1,6 @@
 import { A, Callout, DataTable, LinkAnatomy } from "@/components/docs/Blocks";
 import type { DocPage } from "@/content/types";
-import { ISSUES_URL } from "@/lib/site";
+import { CONTACT_EMAIL, ISSUES_URL } from "@/lib/site";
 
 export const security: DocPage = {
   slug: "security",
@@ -145,7 +145,12 @@ export const security: DocPage = {
       id: "report",
       title: "Report a problem",
       keywords: "vulnerability disclosure bug",
-      body: (
+      body: CONTACT_EMAIL ? (
+        <p>
+          Email <A href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</A> with what you found and how to
+          reproduce it. Please don’t post it publicly first. Never include a working link or key.
+        </p>
+      ) : (
         <p>
           Open an issue on <A href={ISSUES_URL}>GitHub</A>. Issues are public, so for a vulnerability
           say only that you have one and ask for a private channel. Never include a working link or

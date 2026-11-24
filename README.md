@@ -265,7 +265,8 @@ Configure these keys in your `.env.local` file:
 
 | Variable | Description | Required | Default / Example |
 |----------|-------------|:--------:|-------------------|
-| `NEXT_PUBLIC_APP_URL` | Base URL used when building shareable claim links | Yes | `https://floeonsui.vercel.app` |
+| `NEXT_PUBLIC_APP_URL` | Site address for link previews, `robots.txt` and the sitemap | No | `https://floeonsui.vercel.app` |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | Monitored contact address, shown publicly | No | Falls back to GitHub issues |
 | `NEXT_PUBLIC_SUI_NETWORK` | Target Sui network environment | Yes | `testnet` |
 | `NEXT_PUBLIC_SUI_RPC_URL` | Sui gRPC endpoint | No | `https://fullnode.testnet.sui.io:443` |
 | `NEXT_PUBLIC_FLOE_PACKAGE_ID` | Deployed Move package object ID | Yes | `0x...` |
