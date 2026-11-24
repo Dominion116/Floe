@@ -149,14 +149,15 @@ https://<your domain>/auth`}
         <ul>
           <li>Have the contract audited.</li>
           <li>
+            Run a Walrus publisher if you want gifts. There is no public one on mainnet, so protect
+            yours from abuse.
+          </li>
+          <li>
             Decide how people who hold only $LOFI will pay to withdraw it. If you sponsor that, limit it
             so it can’t drain your gas budget.
           </li>
           <li>Publish it on mainnet, and set the network, node and package ID together.</li>
           <li>Create mainnet Enoki keys and fund sponsorship.</li>
-          <li>
-            Replace the sample water figures on the landing and analytics pages with real ones.
-          </li>
           <li>
             Have a lawyer review the <A href="/terms">terms</A> and{" "}
             <A href="/privacy">privacy policy</A> for where you operate. Moving money for other people

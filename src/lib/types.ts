@@ -14,6 +14,16 @@ export interface CardTheme {
 /** Dollar price of one token. */
 export type Rates = Record<Token, number>;
 
+/** What Floe claims have sent to the water treasury, from everyone. */
+export interface Impact {
+  /** In base units. */
+  donated: Record<Token, string>;
+  roundups: number;
+  claims: number;
+  /** False while older claims are still being read, so the totals are a minimum. */
+  complete: boolean;
+}
+
 /** `creating` means the payment was signed but its escrow isn't confirmed yet. */
 export type EscrowStatus = "creating" | "pending" | "claimed" | "expired" | "reclaimed";
 
@@ -35,6 +45,8 @@ export interface PaymentLinkRecord {
   recipientNote: string;
   themeId: CardThemeId;
   hasWaterDonation: boolean;
+  /** Only whether there was one. The gift and where it is stored stay in the link. */
+  hasGift?: boolean;
   createdAt: number;
   expiresAt: number;
   status: EscrowStatus;

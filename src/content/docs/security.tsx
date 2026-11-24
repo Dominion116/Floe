@@ -131,6 +131,11 @@ export const security: DocPage = {
           </li>
           <li>The note is part of the link and is not signed, so someone forwarding it could edit it.</li>
           <li>
+            A <A href="/docs/gifts">gift</A> can be opened by anyone with the link, and can’t be deleted,
+            even after a refund. The blob ID isn’t signed, but a swapped gift won’t open unless it was
+            made with the link’s key.
+          </li>
+          <li>
             The sender’s name isn’t shown or verified. A link proves there is money in it, not who
             sent it.
           </li>

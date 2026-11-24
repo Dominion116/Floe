@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-// Stays noindex through the dashboard layout while the figures include a sample baseline.
 export const metadata: Metadata = {
   title: "Water impact · Floe",
   description:

@@ -19,6 +19,7 @@
 - ✅ **Lofi Clean Ocean Mission:** Built-in "Round up 10¢ to Clean Water" toggle that directs micro-donations directly to the Lofi Foundation Treasury on-chain.
 - ✅ **Sender Safety Timeout & Clawback:** Automated 14-day escrow expiration enabling senders to cancel and refund unclaimed links atomically.
 - ✅ **Consumer Currency Display:** Real-time dual display in fiat USD (`$10.00`) alongside native `SUI` and `$LOFI` token equivalents.
+- ✅ **Photo & Voice Gifts on Walrus:** Encrypted in the browser with a key derived from the link, stored on Walrus, and opened after the claim.
 - ✅ **Account & Withdraw:** Recipients see their balance and withdraw to any Sui address, with no seed phrase needed.
 - ✅ **Social Share & QR Settlement:** One-tap link sharing for WhatsApp, Telegram, iMessage, and high-contrast dynamic QR codes for in-person payments.
 - 🚧 **Multi-Token Splits & Multi-Claim Pools:** Distribute funds across multiple recipients from a single master link (in development).
@@ -272,6 +273,8 @@ Configure these keys in your `.env.local` file:
 | `NEXT_PUBLIC_FLOE_PACKAGE_ID` | Deployed Move package object ID | Yes | `0x...` |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID for zkLogin | Yes | `xxx.apps.googleusercontent.com` |
 | `NEXT_PUBLIC_ENOKI_API_KEY` | Public Enoki API key for gas sponsorship | Yes | `enoki_public_key_here` |
+| `NEXT_PUBLIC_WALRUS_PUBLISHER` | Walrus publishers for gifts, comma separated | No | Public services on testnet, off on mainnet |
+| `NEXT_PUBLIC_WALRUS_AGGREGATOR` | Walrus aggregators for gifts, comma separated | No | Public service on testnet, off on mainnet |
 | `ENOKI_SECRET_KEY` | Private Enoki API key, used by `/api/claim` to pay gas | Yes | `enoki_private_key_here` |
 
 ---

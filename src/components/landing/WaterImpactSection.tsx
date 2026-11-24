@@ -1,7 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
+import { NETWORK } from "@/lib/chain/config";
+import { useImpact } from "@/lib/useImpact";
 
 export function WaterImpactSection() {
+  const impact = useImpact();
+
   return (
     <section aria-labelledby="water-impact-heading" className="section-padding bg-snow">
       <div className="container-standard">
@@ -11,8 +17,8 @@ export function WaterImpactSection() {
               Every 10¢ roundup cleans 10 gallons of ocean water
             </h2>
             <p className="type-lede mt-4 text-ink/75">
-              Turn it on when you create a link. The escrow contract sends the full 10¢ to the Lofi
-              clean water treasury when the link is claimed.
+              Turn it on when you create a link. The escrow contract sends the full roundup to the
+              Lofi clean water treasury when the link is claimed.
             </p>
             <Link
               href="/dashboard/analytics"
@@ -22,18 +28,35 @@ export function WaterImpactSection() {
             </Link>
           </div>
 
-          <dl className="grid grid-cols-2 gap-6 self-end lg:col-span-4 lg:col-start-9 lg:grid-cols-1">
-            <div>
-              <dt className="text-sm text-ink/75">Gallons funded</dt>
-              <dd className="type-figure mt-1 text-4xl lg:text-5xl">48,290</dd>
+          <dl
+            aria-busy={impact.status === "loading"}
+            className="grid grid-cols-2 gap-6 self-end lg:col-span-4 lg:col-start-9 lg:grid-cols-1"
+          >
+            <div className="min-w-0">
+              <dt className="text-sm text-ink/75">Sent to the treasury</dt>
+              <dd className="type-figure mt-1 text-3xl [overflow-wrap:anywhere] lg:text-5xl">
+                {impact.donated}
+              </dd>
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-sm text-ink/75">Roundups</dt>
-              <dd className="type-figure mt-1 text-4xl lg:text-5xl">4,829</dd>
+              <dd className="type-figure mt-1 text-3xl [overflow-wrap:anywhere] lg:text-5xl">
+                {impact.roundups}
+              </dd>
             </div>
-            <div className="col-span-full text-[13px] text-ink/75">
+            <div className="col-span-full text-[13px] leading-5 text-ink/75">
               <dt className="sr-only">Source</dt>
-              <dd>Sample figures for the hackathon build.</dd>
+              <dd role="status">
+                {impact.status === "loading"
+                  ? "Reading from Sui…"
+                  : impact.status === "unavailable"
+                    ? "Sui can’t be reached right now."
+                    : impact.partial
+                      ? "Older claims are still being read, so the real totals are higher."
+                      : NETWORK === "testnet"
+                        ? "Read from Sui Testnet, where coins have no real value."
+                        : "Read live from Sui."}
+              </dd>
             </div>
           </dl>
         </Reveal>

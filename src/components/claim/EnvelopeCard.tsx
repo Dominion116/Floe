@@ -1,6 +1,6 @@
 "use client";
 
-import { Droplet } from "lucide-react";
+import { Droplet, Gift } from "lucide-react";
 import { ThemeIcon } from "@/components/ui/ThemeIcon";
 import { CARD_THEMES } from "@/lib/themes";
 import { CardThemeId } from "@/lib/types";
@@ -15,6 +15,7 @@ interface EnvelopeCardProps {
   recipientNote?: string;
   themeId?: CardThemeId;
   hasWaterDonation?: boolean;
+  hasGift?: boolean;
   compact?: boolean;
 }
 
@@ -25,6 +26,7 @@ export function EnvelopeCard({
   recipientNote = "A gift for you",
   themeId = "glacial",
   hasWaterDonation = false,
+  hasGift = false,
   compact = false,
 }: EnvelopeCardProps) {
   const theme = CARD_THEMES[themeId] || CARD_THEMES.glacial;
@@ -65,6 +67,13 @@ export function EnvelopeCard({
       {recipientNote && (
         <p className="mx-auto max-w-xs font-serif text-lg leading-snug text-ink [overflow-wrap:anywhere]">
           “{recipientNote}”
+        </p>
+      )}
+
+      {hasGift && (
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium text-ink">
+          <Gift className="h-4 w-4 shrink-0" aria-hidden="true" />
+          There’s a gift inside
         </p>
       )}
 

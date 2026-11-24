@@ -10,6 +10,7 @@ import { DetailList } from "@/components/ui/DetailList";
 import { EnvelopeCard } from "@/components/claim/EnvelopeCard";
 import { AmountKeypad } from "@/components/send/AmountKeypad";
 import { ThemeSelector } from "@/components/send/ThemeSelector";
+import { GiftInput } from "@/components/send/GiftInput";
 import { NoteInput } from "@/components/send/NoteInput";
 import { WaterRoundupToggle } from "@/components/send/WaterRoundupToggle";
 import { SharePanel } from "@/components/send/SharePanel";
@@ -31,9 +32,12 @@ import {
 } from "@/lib/chain/escrow";
 import type { CardThemeId, PaymentLinkRecord } from "@/lib/types";
 import { generateEphemeralKeypair, buildClaimUrl } from "@/lib/crypto";
+import type { Gift } from "@/lib/gift";
 import { removeLink, saveLink, updateLink } from "@/lib/storage";
+import { useGiftUpload } from "@/lib/useGiftUpload";
 import { refreshPrices, usePrices } from "@/lib/usePrices";
 import { cn, formatCurrency, formatRate, toUsd, usdToToken } from "@/lib/utils";
+import { GIFTS_ENABLED } from "@/lib/walrus";
 
 const STEPS = [
   {
@@ -67,6 +71,7 @@ interface SignedPayment {
   digest: string;
   privateKey: string;
   note: string;
+  giftId: string;
 }
 
 interface CreateLinkModalProps {
@@ -82,6 +87,9 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
   const [selectedThemeId, setSelectedThemeId] = useState<CardThemeId>("glacial");
   const [hasWaterDonation, setHasWaterDonation] = useState<boolean>(true);
   const [note, setNote] = useState<string>("");
+  const [gift, setGift] = useState<Gift | null>(null);
+  const [giftBusy, setGiftBusy] = useState(false);
+  const { upload, start: startUpload, clear: clearUpload } = useGiftUpload();
   const [generatedClaimUrl, setGeneratedClaimUrl] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +117,10 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
         ? "Checking live price…"
         : "Live price unavailable";
   const current = STEPS[step];
+  // The payment waits for the gift, so the link is never made without one that was promised.
+  const storedGift = gift && upload.status === "ready" && upload.gift === gift ? upload : null;
+  const giftFailed = gift !== null && upload.status === "failed";
+  const giftPending = gift !== null && !storedGift;
 
   // Each step starts at the top with its title announced.
   useEffect(() => {
@@ -146,6 +158,8 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
       setSelectedThemeId("glacial");
       setHasWaterDonation(true);
       setNote("");
+      setGift(null);
+      clearUpload();
       setGeneratedClaimUrl("");
       setLinkSaved(false);
       setConfirmClose(false);
@@ -157,7 +171,13 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
     updateLink(payment.digest, { escrowId, status: "pending" });
     setUnconfirmed(null);
     setGeneratedClaimUrl(
-      buildClaimUrl(window.location.origin, escrowId, payment.privateKey, payment.note)
+      buildClaimUrl(
+        window.location.origin,
+        escrowId,
+        payment.privateKey,
+        payment.note,
+        payment.giftId
+      )
     );
     setLinkSaved(false);
     setConfirmClose(false);
@@ -211,6 +231,7 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
       return;
     }
 
+    if (giftPending) return;
     if (!account) {
       setError("Choose the wallet to pay from.");
       return;
@@ -234,7 +255,7 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
     setIsCreating(true);
     try {
       // The private key stays in memory until it becomes part of the link.
-      const keypair = generateEphemeralKeypair();
+      const keypair = storedGift?.keys ?? generateEphemeralKeypair();
       const signed = await dAppKit.signTransaction({
         transaction: buildCreate({
           token: payToken,
@@ -260,6 +281,7 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
         recipientNote: trimmedNote,
         themeId: selectedThemeId,
         hasWaterDonation,
+        hasGift: storedGift !== null,
         createdAt: Date.now(),
         expiresAt: Date.now() + LINK_DURATION_MS,
         status: "creating",
@@ -273,6 +295,7 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
         digest,
         privateKey: keypair.privateKey,
         note: trimmedNote,
+        giftId: storedGift?.blobId ?? "",
       });
     } catch (err) {
       setError(
@@ -296,6 +319,11 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
     if (step === SHARE) {
       handleClose();
       return;
+    }
+    if (giftBusy) return;
+    if (current.id === "personalize") {
+      if (gift) void startUpload(gift);
+      else clearUpload();
     }
     setError(null);
     setStep(step + 1);
@@ -371,6 +399,9 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
                   onSelectTheme={setSelectedThemeId}
                 />
                 <NoteInput note={note} onChangeNote={setNote} />
+                {GIFTS_ENABLED && (
+                  <GiftInput gift={gift} onChange={setGift} onBusyChange={setGiftBusy} />
+                )}
                 <WaterRoundupToggle
                   enabled={hasWaterDonation}
                   onToggle={setHasWaterDonation}
@@ -387,8 +418,36 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
                   recipientNote={note.trim() || "A gift for you"}
                   themeId={selectedThemeId}
                   hasWaterDonation={hasWaterDonation}
+                  hasGift={gift !== null}
                   compact
                 />
+                {giftFailed && (
+                  <div role="alert" className="rounded-2xl bg-warning-fill p-4">
+                    <p className="text-sm text-ink">
+                      Your {gift?.mime === "image/jpeg" ? "photo" : "voice note"} couldn’t be added.
+                      No money has moved.
+                    </p>
+                    <div className="mt-3 grid gap-2 min-[400px]:grid-cols-2">
+                      <button
+                        type="button"
+                        onClick={() => gift && void startUpload(gift)}
+                        className="btn btn-sm btn-secondary"
+                      >
+                        Try again
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGift(null);
+                          clearUpload();
+                        }}
+                        className="btn btn-sm btn-ghost"
+                      >
+                        Send without it
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <DetailList
                   items={[
                     {
@@ -404,6 +463,14 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
                       label: "Clean water roundup",
                       value: hasWaterDonation ? formatCurrency(waterDonationUsd) : "None",
                     },
+                    ...(gift
+                      ? [
+                          {
+                            label: gift.mime === "image/jpeg" ? "Photo" : "Voice note",
+                            value: storedGift ? "Encrypted and added" : giftFailed ? "Not added" : "Adding…",
+                          },
+                        ]
+                      : []),
                     { label: "Gas for them", value: "$0.00" },
                     { label: "Link expires", value: "In 14 days" },
                     {
@@ -482,14 +549,26 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
           )}
           <button
             type="submit"
-            disabled={isCreating}
-            aria-busy={isCreating}
+            disabled={
+              isCreating ||
+              (current.id === "personalize" && giftBusy) ||
+              (current.id === "review" && giftPending && !unconfirmed)
+            }
+            aria-busy={isCreating || (current.id === "review" && giftPending && !giftFailed)}
             className={cn("btn flex-1", step === SHARE ? "btn-secondary" : "btn-primary")}
           >
             {current.id === "review" ? (
               <>
-                {isCreating && <Loader2 className="animate-spin" aria-hidden="true" />}
-                <span>{unconfirmed ? "Check again" : "Create payment link"}</span>
+                {(isCreating || (giftPending && !giftFailed)) && (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                )}
+                <span>
+                  {unconfirmed
+                    ? "Check again"
+                    : giftPending && !giftFailed
+                      ? "Adding your gift…"
+                      : "Create payment link"}
+                </span>
               </>
             ) : step === SHARE ? (
               <span>Done</span>

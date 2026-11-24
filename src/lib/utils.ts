@@ -6,6 +6,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** The rate the app uses: a 10¢ roundup funds 10 gallons. */
+export const GALLONS_PER_USD = 100;
+
 export function usdToToken(usd: number, rate: number): number {
   return parseFloat((usd / rate).toFixed(4));
 }

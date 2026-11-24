@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Check, CheckCircle2, Copy, ExternalLink } from "lucide-react";
+import { GiftReveal } from "@/components/claim/GiftReveal";
 import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
 import { DetailList, type Detail } from "@/components/ui/DetailList";
 import { LiveValue } from "@/components/ui/LiveValue";
@@ -15,6 +16,7 @@ interface PostClaimViewProps {
   recipientAddress: string;
   txDigest: string;
   hasWaterDonation: boolean;
+  gift: { giftId: string; privateKey: string } | null;
 }
 
 export function PostClaimView({
@@ -23,6 +25,7 @@ export function PostClaimView({
   recipientAddress,
   txDigest,
   hasWaterDonation,
+  gift,
 }: PostClaimViewProps) {
   const [copied, setCopied] = useState(false);
 
@@ -69,6 +72,8 @@ export function PostClaimView({
           It’s in your own Sui account. Floe can’t move it.
         </p>
       </div>
+
+      {gift && <GiftReveal {...gift} />}
 
       <DetailList items={details} />
 

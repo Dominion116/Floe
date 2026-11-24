@@ -109,6 +109,23 @@ export const terms: LegalDoc = {
       ),
     },
     {
+      id: "gifts",
+      title: "Photo and voice gifts",
+      body: (
+        <>
+          <p>
+            You keep your rights in what you send, and are responsible for it. Gifts are encrypted before
+            they leave your device, so we don’t see, review or endorse them, and can’t remove them. They
+            may be lost or expire, and refunding a link doesn’t delete its gift.
+          </p>
+          <p>
+            Open gifts only from people you trust. If you receive something illegal, report it to the
+            authorities where you live.
+          </p>
+        </>
+      ),
+    },
+    {
       id: "expiry-and-refunds",
       title: "Expiry and refunds",
       body: (
@@ -179,7 +196,7 @@ export const terms: LegalDoc = {
         <p>
           The roundup is optional and goes to an address set in the contract when a link is claimed.
           We don’t control that address or how its owner spends what it receives, and Floe is not a
-          charity. Impact figures are illustrative, and some are sample data. Don’t assume that a
+          charity. Impact figures are estimates, and totals can be late or incomplete. Don’t assume that a
           roundup is tax deductible.
         </p>
       ),
@@ -195,6 +212,10 @@ export const terms: LegalDoc = {
             <li>Commit fraud, or trick someone into opening a link or giving up one</li>
             <li>Take money using a link that was not meant for you</li>
             <li>Send unwanted messages, or pretend to be someone else</li>
+            <li>
+              Send a photo or recording that is illegal, sexual, violent, hateful or harassing, or that
+              you have no right to share
+            </li>
             <li>Abuse sponsored gas, overload the service or get around its limits</li>
             <li>Attack the service or its users, except for good-faith security research</li>
           </ul>
@@ -221,7 +242,7 @@ export const terms: LegalDoc = {
       title: "Other services",
       body: (
         <p>
-          Floe depends on services we don’t control, including Sui, Enoki, Google, wallets, price
+          Floe depends on services we don’t control, including Sui, Walrus, Enoki, Google, wallets, price
           sources and hosting. Their terms apply to your use of them. We are not responsible for their
           faults, delays or decisions.
         </p>

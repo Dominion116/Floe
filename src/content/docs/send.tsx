@@ -59,6 +59,9 @@ export const send: DocPage = {
                 gift for you”.
               </p>
               <p>
+                You can also add a <A href="/docs/gifts">photo or a voice note</A>.
+              </p>
+              <p>
                 The <A href="/docs/water">10¢ water roundup</A> is on by default. Turn it off here if
                 you don’t want it.
               </p>

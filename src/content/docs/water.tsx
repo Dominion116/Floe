@@ -66,16 +66,27 @@ export const water: DocPage = {
     },
     {
       id: "figures",
-      title: "About the figures",
-      keywords: "gallons sample 48,290 impact",
+      title: "How the totals are counted",
+      keywords: "gallons impact api events verify real",
       body: (
-        <Callout title="Some totals are sample data">
+        <>
           <p>
-            The 48,290 gallons and 4,829 roundups on the site are sample figures for the hackathon
-            build. “10 gallons per roundup” is the rate the interface uses, not a measurement by
-            Floe. Your own count includes only links that were claimed.
+            The totals on the site come from Sui, through{" "}
+            <A href="/docs/http-api#impact">GET /api/impact</A>. Floe reads every claim made with this
+            contract, then counts a roundup only as far as the treasury received it in SUI or $LOFI in
+            that same transaction. Escrows of other coins add nothing.
           </p>
-        </Callout>
+          <p>
+            Gallons are an estimate. Floe values the donated tokens at the live price and uses 10
+            gallons for each 10¢, which is the rate the interface uses and not a measurement by Floe.
+          </p>
+          <Callout title="Testnet totals">
+            <p>
+              Testnet coins have no value, so the totals there show that the tracking works. They
+              don’t represent real water.
+            </p>
+          </Callout>
+        </>
       ),
     },
   ],
