@@ -74,8 +74,8 @@ export function PostClaimView({
 
       <div className="grid gap-3 min-[400px]:grid-cols-2">
         <CreateLinkButton className="btn btn-primary col-span-full">Send to a friend</CreateLinkButton>
-        <Link href="/dashboard" className="btn btn-secondary px-4">
-          Keep in account
+        <Link href="/account" className="btn btn-secondary px-4">
+          Account and withdraw
         </Link>
         <a
           href={explorerTxUrl(txDigest)}

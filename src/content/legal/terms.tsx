@@ -133,7 +133,12 @@ export const terms: LegalDoc = {
             If you claim with Google, you receive the money in a Sui account tied to your Google login
             and to Floe’s sign-in settings. You need your Google account, and Google and Enoki must be
             available, to use it. The account doesn’t carry over to other apps. If you want full
-            control, claim with a wallet, or send the money on to one.
+            control, claim with a wallet, or withdraw to one.
+          </p>
+          <p>
+            You are responsible for the address you withdraw to. Withdrawals can’t be reversed, and
+            money sent to a wrong, unsupported or inaccessible address may be lost. Our address checks
+            can’t catch every mistake.
           </p>
           <p>
             Claim only links that were meant for you. Keep your Google account, wallet and devices
@@ -159,7 +164,8 @@ export const terms: LegalDoc = {
       body: (
         <>
           <p>
-            Floe charges no fee at present. Senders pay Sui network fees to create and refund links.
+            Floe charges no fee at present. You pay Sui network fees to create or refund a link, or
+            to withdraw.
             We currently sponsor the network fee for claims, but we may limit or stop this, and it may
             be unavailable. Your wallet or other services may charge fees of their own.
           </p>

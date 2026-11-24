@@ -111,7 +111,10 @@ export const privacy: LegalDoc = {
       title: "What is public on Sui",
       body: (
         <>
-          <p>Sui is a public blockchain. For every link, anyone can see:</p>
+          <p>
+            Sui is a public blockchain. Balances and withdrawals are public, and for every link anyone
+            can see:
+          </p>
           <ul>
             <li>The sender’s address</li>
             <li>The amount, token, roundup and envelope theme</li>
@@ -162,12 +165,12 @@ export const privacy: LegalDoc = {
               ],
               [
                 "Sui nodes and GraphQL",
-                "Links are loaded, created, claimed, refunded or tracked",
+                "Links are loaded, created, claimed, refunded or tracked, or you view or withdraw a balance",
                 "The escrow and transaction IDs, addresses and signed transactions involved",
               ],
               [
                 "Your wallet, such as Slush",
-                "You open a create, claim or refund screen",
+                "You open a create, claim, refund or account screen",
                 "A request for wallet details, then what you ask the wallet to sign",
               ],
               [
@@ -258,7 +261,8 @@ export const privacy: LegalDoc = {
               links first, or keep a note of their escrow IDs.
             </li>
             <li>
-              Choose <strong>Change</strong> next to a connected account to disconnect it.
+              Log out on <A href="/account">Your account</A>, or choose <strong>Change</strong> next
+              to a connected account.
             </li>
             <li>Claim with a wallet instead of Google.</li>
             <li>Remove Floe’s access in your Google account settings.</li>

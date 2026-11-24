@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { CircleUser, Menu, X } from "lucide-react";
 import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
 import { useDialog } from "@/components/ui/Dialog";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,9 @@ const NAV_LINKS = [
   { href: "/dashboard/analytics", label: "Water impact" },
   { href: "/docs", label: "Docs" },
 ];
+
+/** The account has its own icon beside the links on larger screens. */
+const MENU_LINKS = [...NAV_LINKS, { href: "/account", label: "Your account" }];
 
 /** Every docs page counts as Docs. */
 const isCurrent = (href: string, pathname: string) =>
@@ -82,6 +85,20 @@ export function Navbar({ overlay = false }: { overlay?: boolean }) {
         </nav>
 
         <div className="flex items-center gap-1">
+          <Link
+            href="/account"
+            aria-label="Your account"
+            title="Your account"
+            aria-current={pathname === "/account" ? "page" : undefined}
+            className={cn(
+              "btn-icon hidden md:inline-flex",
+              light
+                ? "text-white/80 hover:bg-white/10 hover:text-white"
+                : "aria-[current=page]:bg-mist-light aria-[current=page]:text-ink"
+            )}
+          >
+            <CircleUser className="h-5 w-5" aria-hidden="true" />
+          </Link>
           <CreateLinkButton
             className={cn("btn btn-sm", light ? "btn-dark-primary" : "btn-primary")}
           >
@@ -119,7 +136,7 @@ export function Navbar({ overlay = false }: { overlay?: boolean }) {
             </div>
             <nav aria-label="Mobile" className="container-standard min-h-0 flex-1 overflow-y-auto py-6">
               <ul className="space-y-1">
-                {NAV_LINKS.map((link) => (
+                {MENU_LINKS.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
