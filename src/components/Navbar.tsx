@@ -99,8 +99,9 @@ export function Navbar({ overlay = false }: { overlay?: boolean }) {
           >
             <CircleUser className="h-5 w-5" aria-hidden="true" />
           </Link>
+          {/* On phones the menu has its own */}
           <CreateLinkButton
-            className={cn("btn btn-sm", light ? "btn-dark-primary" : "btn-primary")}
+            className={cn("btn btn-sm hidden md:inline-flex", light ? "btn-dark-primary" : "btn-primary")}
           >
             Create link
           </CreateLinkButton>

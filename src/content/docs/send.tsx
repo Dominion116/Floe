@@ -37,7 +37,7 @@ export const send: DocPage = {
             <>
               <p>
                 Type an amount or pick 5, 20 or 50. You can enter dollars or SUI, with up to two
-                decimal places. On mainnet, $LOFI appears as a third choice.
+                decimal places. $LOFI is shown too, and can be chosen only on mainnet.
               </p>
               <p>
                 Dollar amounts are paid in SUI. Floe converts at the live price when you create the

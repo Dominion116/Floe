@@ -34,9 +34,12 @@ export const COIN_TYPES: Record<Token, string> = {
   LOFI: "0xf22da9a24ad027cccb5f2d496cbe91de953d363513db08a3a734d361c7c17503::LOFI::LOFI",
 };
 
-/** $LOFI is deployed on mainnet only. */
-export const CURRENCIES: Currency[] =
-  NETWORK === "mainnet" ? ["USD", "SUI", "LOFI"] : ["USD", "SUI"];
+export const ALL_CURRENCIES: Currency[] = ["USD", "SUI", "LOFI"];
+
+/** What can be sent on this network. $LOFI is deployed on mainnet only. */
+export const CURRENCIES: Currency[] = ALL_CURRENCIES.filter(
+  (currency) => currency !== "LOFI" || NETWORK === "mainnet"
+);
 
 /** Dollar links are funded in SUI. */
 export const fundingToken = (currency: Currency): Token => (currency === "LOFI" ? "LOFI" : "SUI");

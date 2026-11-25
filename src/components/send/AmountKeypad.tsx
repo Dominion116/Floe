@@ -1,7 +1,7 @@
 "use client";
 
 import { Delete } from "lucide-react";
-import { CURRENCIES, type Currency } from "@/lib/chain/config";
+import { ALL_CURRENCIES, CURRENCIES, type Currency } from "@/lib/chain/config";
 import type { Rates } from "@/lib/types";
 import { approxUsd, cn, formatCurrency, toUsd, usdToToken } from "@/lib/utils";
 
@@ -18,6 +18,8 @@ interface AmountKeypadProps {
 const LABELS: Record<Currency, string> = { USD: "USD", SUI: "SUI", LOFI: "$LOFI" };
 
 const PRESETS = [5, 20, 50];
+
+const LOFI_SOON = !CURRENCIES.includes("LOFI");
 
 export function AmountKeypad({
   amountStr,
@@ -76,15 +78,19 @@ export function AmountKeypad({
 
   return (
     <div className="space-y-5">
-      <fieldset>
+      <fieldset aria-describedby={LOFI_SOON ? "lofi-soon" : undefined}>
         <legend className="sr-only">Currency</legend>
         <div className="mx-auto grid w-full max-w-[17.5rem] auto-cols-fr grid-flow-col gap-1 rounded-full bg-mist-light p-1">
-          {CURRENCIES.map((id) => (
+          {ALL_CURRENCIES.map((id) => (
             <label
               key={id}
               className={cn(
-                "flex min-h-[40px] cursor-pointer items-center justify-center rounded-full text-sm font-medium transition-colors duration-150 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink",
-                currency === id ? "bg-white text-ink" : "text-ink-muted hover:text-ink"
+                "flex min-h-[40px] items-center justify-center rounded-full text-sm font-medium transition-colors duration-150 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink",
+                !CURRENCIES.includes(id)
+                  ? "cursor-not-allowed text-ink-muted opacity-60"
+                  : currency === id
+                    ? "cursor-pointer bg-white text-ink"
+                    : "cursor-pointer text-ink-muted hover:text-ink"
               )}
             >
               <input
@@ -92,6 +98,7 @@ export function AmountKeypad({
                 name="currency"
                 value={id}
                 checked={currency === id}
+                disabled={!CURRENCIES.includes(id)}
                 onChange={() => onToggleCurrency(id)}
                 className="sr-only"
               />
@@ -99,6 +106,11 @@ export function AmountKeypad({
             </label>
           ))}
         </div>
+        {LOFI_SOON && (
+          <p id="lofi-soon" className="type-help mt-2 text-center">
+            $LOFI will be available on mainnet.
+          </p>
+        )}
       </fieldset>
 
       <div className="text-center">
