@@ -204,6 +204,10 @@ export const privacy: LegalDoc = {
             their location and other hidden details.
           </p>
           <p>
+            If you choose a yeti card, your browser downloads it from this site, so our host sees that
+            request. It doesn’t show which link the card goes in.
+          </p>
+          <p>
             The gift is encrypted on your device, then stored on Walrus, a public storage network run by
             independent operators. Anyone can download the encrypted bytes and see their size, but
             opening them needs the full link. We can’t open, recover or delete a gift. Storage is paid

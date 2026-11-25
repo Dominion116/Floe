@@ -88,7 +88,7 @@ export function LinkCard({ link, onClawbackClick }: LinkCardProps) {
       {link.hasGift && (
         <p className="type-help mt-1 flex items-center gap-1.5">
           <Gift className="h-4 w-4 shrink-0" aria-hidden="true" />
-          Photo or voice note inside
+          Gift inside
         </p>
       )}
       {link.hasWaterDonation && (

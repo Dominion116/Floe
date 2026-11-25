@@ -4,23 +4,25 @@ import type { DocPage } from "@/content/types";
 export const gifts: DocPage = {
   slug: "gifts",
   file: "gifts.tsx",
-  title: "Photo and voice gifts",
-  description: "Put a photo or a voice note in the envelope. It opens after the money is claimed.",
+  title: "Cards, photos and voice",
+  description: "Put a yeti card, a photo or a voice note in the envelope. It opens after the money is claimed.",
   sections: [
     {
       id: "add",
       title: "Add one",
-      keywords: "photo picture voice note record microphone attach",
+      keywords: "yeti card birthday thank you congrats holidays photo picture voice note record microphone attach",
       body: (
         <>
           <p>
-            In the second step of <A href="/docs/send#personalize">creating a link</A>, choose{" "}
-            <strong>Add a photo</strong> or <strong>Record voice</strong>. A link holds one gift.
+            In the second step of <A href="/docs/send#personalize">creating a link</A>, tap a yeti
+            card, or choose <strong>Add a photo</strong> or <strong>Record voice</strong>. A link holds
+            one gift.
           </p>
           <DataTable
             label="Gift limits"
             head={["Kind", "Limit"]}
             rows={[
+              ["Yeti card", "Birthday, Thank you, Congrats or Holidays. Nothing to prepare."],
               ["Photo", "Resized to fit 1,280 pixels. Location and other hidden details are left out."],
               ["Voice note", "30 seconds"],
               ["Size", "Just under 1 MB once prepared"],
@@ -63,7 +65,8 @@ export const gifts: DocPage = {
           </li>
           <li>
             The blob ID goes after the <code>#</code> in the link, beside the key and the note. Neither
-            Sui nor Floe’s server learns that there is a gift.
+            Sui nor Floe’s server learns which link has a gift. Yeti cards are ordinary pictures on this
+            site, so the server sees one being downloaded, but not the link it goes in.
           </li>
           <li>
             The recipient’s browser downloads the bytes, checks that they haven’t changed and decrypts
@@ -108,6 +111,7 @@ export const gifts: DocPage = {
           label="Gift problems"
           head={["What you see", "What to do"]}
           rows={[
+            ["That card couldn’t be loaded", "Check your connection, then tap it again."],
             ["Couldn’t be added", "Try again, or send without it. Storage services are busy or down."],
             ["Can’t open that photo", "Use a JPEG or PNG. Some browsers can’t read HEIC."],
             ["Allow the microphone", "Allow it in the browser’s site settings, then try again."],

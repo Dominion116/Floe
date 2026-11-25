@@ -32,7 +32,7 @@ import {
 } from "@/lib/chain/escrow";
 import type { CardThemeId, PaymentLinkRecord } from "@/lib/types";
 import { generateEphemeralKeypair, buildClaimUrl } from "@/lib/crypto";
-import type { Gift } from "@/lib/gift";
+import { giftNoun, type Gift } from "@/lib/gift";
 import { removeLink, saveLink, updateLink } from "@/lib/storage";
 import { useGiftUpload } from "@/lib/useGiftUpload";
 import { refreshPrices, usePrices } from "@/lib/usePrices";
@@ -424,8 +424,7 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
                 {giftFailed && (
                   <div role="alert" className="rounded-2xl bg-warning-fill p-4">
                     <p className="text-sm text-ink">
-                      Your {gift?.mime === "image/jpeg" ? "photo" : "voice note"} couldn’t be added.
-                      No money has moved.
+                      Your {gift && giftNoun(gift)} couldn’t be added. No money has moved.
                     </p>
                     <div className="mt-3 grid gap-2 min-[400px]:grid-cols-2">
                       <button
@@ -466,7 +465,7 @@ export default function CreateLinkModal({ open, onClose, onCreated }: CreateLink
                     ...(gift
                       ? [
                           {
-                            label: gift.mime === "image/jpeg" ? "Photo" : "Voice note",
+                            label: `Your ${giftNoun(gift)}`,
                             value: storedGift ? "Encrypted and added" : giftFailed ? "Not added" : "Adding…",
                           },
                         ]
