@@ -143,11 +143,12 @@ export const client: DocPage = {
     {
       id: "gifts",
       title: "Gifts and Walrus",
-      keywords: "sealGift openGift giftMime storeBlob readBlob GIFTS_ENABLED walrus.ts gift.ts",
+      keywords: "YETI_CARDS loadCard sealGift openGift giftMime storeBlob readBlob GIFTS_ENABLED walrus.ts gift.ts",
       body: (
         <>
           <p>
-            From <code>src/lib/gift.ts</code> and <code>src/lib/walrus.ts</code>.
+            From <code>src/lib/gift.ts</code>, <code>src/lib/walrus.ts</code> and{" "}
+            <code>src/lib/yetiCards.ts</code>.
           </p>
           <DataTable
             label="Gift exports"
@@ -159,11 +160,13 @@ export const client: DocPage = {
               ["giftMime(bytes)", "GiftMime | null", "What the bytes really are"],
               ["storeBlob(blob, signal?)", "string", "Stores bytes and returns the blob ID"],
               ["readBlob(id)", "Uint8Array", "Reads bytes, up to the size limit"],
+              ["YETI_CARDS", "YetiCard[]", "The ready-made cards"],
+              ["loadCard(card)", "Gift", "Downloads a ready-made card"],
               ["GIFTS_ENABLED", "boolean", "Whether this site can store and read gifts"],
             ]}
           />
           <p>
-            All but <code>giftMime</code> and <code>GIFTS_ENABLED</code> return promises. A sealed gift
+            All but <code>giftMime</code> and the constants return promises. A sealed gift
             is a 12-byte IV, then the encrypted version byte, type byte and content.
           </p>
         </>

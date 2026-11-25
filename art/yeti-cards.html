@@ -1,0 +1,210 @@
+<!doctype html>
+<!-- Source of public/cards/*.jpg. Open with #birthday, #thanks, #congrats or #holidays at 1024 × 1280.
+     Needs Newsreader installed, or its Latin woff2 saved beside this file as newsreader.woff2. -->
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face { font-family: "NR"; src: url("newsreader.woff2") format("woff2"), local("Newsreader"); font-weight: 200 800; }
+  html, body { margin: 0; overflow: hidden; }
+  svg { display: block; }
+  .h { font-family: "NR", Georgia, serif; font-weight: 300; font-size: 208px; letter-spacing: -0.04em; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  const name = location.hash.slice(1) || "birthday";
+
+  // ── The yeti ──────────────────────────────────────────────────────────────
+  const BLUE = `fill="#5F8FD6" stroke="#34549A" stroke-width="4"`;
+  const ARMS = {
+    down: `<path class="fur" d="M60 832 C102 846 126 892 120 942 L82 940 C86 904 78 884 52 874 Z" />
+      <path ${BLUE} d="M82 938 C80 956 84 968 92 968 L96 962 C97 974 106 974 107 964 C110 972 118 970 118 960 C124 956 124 946 122 938 Z" />`,
+    wave: `<path class="fur" d="M-52 838 C-86 836 -104 822 -110 786 L-148 794 C-146 848 -112 888 -64 884 Z" />
+      <path ${BLUE} d="M-154 792 C-158 776 -168 762 -166 754 C-163 747 -155 750 -151 758 L-146 768 L-149 742 C-149 733 -138 732 -137 741 L-133 764 L-128 740 C-125 732 -115 735 -117 744 L-120 768 L-108 752 C-102 746 -94 752 -99 760 C-104 770 -106 782 -108 794 C-118 806 -144 806 -154 792 Z" />`,
+    fist: `<path class="fur" d="M-52 838 C-86 836 -104 822 -110 786 L-148 794 C-146 848 -112 888 -64 884 Z" />
+      <path ${BLUE} d="M-156 790 C-162 766 -152 752 -130 752 C-108 752 -100 766 -106 790 C-116 806 -146 806 -156 790 Z" />
+      <path stroke="#34549A" stroke-width="4" fill="none" d="M-146 770 V758 M-130 770 V756 M-115 770 V758" />`,
+  };
+  const mirror = (s) => `<g transform="scale(-1 1)">${s}</g>`;
+  const FRONT = {
+    // Both hands in front, around whatever is being held
+    hold: `<path class="fur" d="M-92 846 C-122 884 -116 934 -66 946 L-50 914 C-76 906 -74 880 -60 862 Z" />
+      <path ${BLUE} d="M-72 912 C-56 900 -36 904 -32 916 C-40 918 -40 922 -32 926 C-40 930 -40 934 -34 940 C-46 952 -68 950 -76 940 Z" />
+      ${mirror(`<path class="fur" d="M-92 846 C-122 884 -116 934 -66 946 L-50 914 C-76 906 -74 880 -60 862 Z" />
+      <path ${BLUE} d="M-72 912 C-56 900 -36 904 -32 916 C-40 918 -40 922 -32 926 C-40 930 -40 934 -34 940 C-46 952 -68 950 -76 940 Z" />`)}`,
+  };
+  const HATS = {
+    party: `<g transform="translate(2 -34)"><path d="M-50 758 L2 630 L50 754 C20 768 -20 770 -50 758 Z" fill="#E281A7" />
+      <g stroke="#FFFFFF" stroke-width="9" fill="none"><path d="M-33 733 C-8 742 16 740 37 730" /><path d="M-17 696 C-4 701 12 700 24 694" /></g>
+      <circle cx="2" cy="628" r="18" fill="#F7C65B" /></g>`,
+    knit: `<path d="M-66 752 C-70 690 -36 662 2 662 C42 662 70 692 66 752 Z" fill="#D9485F" />
+      <path d="M-36 670 C-44 700 -44 726 -40 744 M2 662 V744 M38 672 C46 700 46 726 42 744" stroke="#B93550" stroke-width="5" fill="none" />
+      <path d="M-74 732 C-34 720 34 720 74 732 C80 744 80 756 74 764 C34 752 -34 752 -74 764 C-80 756 -80 744 -74 732 Z" fill="#FFFFFF" stroke="#C9D4F4" stroke-width="4" />
+      <circle cx="2" cy="654" r="24" fill="#FFFFFF" stroke="#C9D4F4" stroke-width="4" />`,
+    none: "",
+  };
+  const SCARF = `<path d="M-72 846 C-38 872 38 872 72 846 L78 870 C42 898 -42 898 -78 870 Z" fill="#D9485F" />
+    <path d="M26 884 L58 874 L70 944 L40 952 Z" fill="#B93550" /><path d="M32 930 L66 922" stroke="#FFFFFF" stroke-width="6" />
+    <path d="M-40 866 L-34 884 M-4 872 V892 M34 868 L30 886" stroke="#FFFFFF" stroke-width="6" />`;
+
+  function yeti({ x, y = 1004, k = 1, left = ARMS.wave, right = ARMS.down, hat = "none", held = "", hold = false, scarf = false }) {
+    return `<g transform="translate(${x} ${y}) scale(${k}) translate(0 -1004)" stroke-linejoin="round" stroke-linecap="round">
+      <ellipse cx="0" cy="1004" rx="106" ry="13" fill="#9FB0E4" opacity="0.55" />
+      <g transform="translate(0 9)"><g ${BLUE}>
+        <path d="M-20 972 C-18 996 -26 1002 -52 1002 C-84 1002 -94 996 -86 984 C-80 974 -60 968 -20 972 Z" />
+        <path d="M20 972 C18 996 26 1002 52 1002 C84 1002 94 996 86 984 C80 974 60 968 20 972 Z" /></g>
+        <path stroke="#34549A" stroke-width="4" fill="none" d="M-74 1000 V991 M-60 1001 V991 M-46 1001 V992 M74 1000 V991 M60 1001 V991 M46 1001 V992" /></g>
+      ${hold ? "" : right + left}
+      <path class="fur" d="M0 702 C46 702 70 736 70 778 C70 798 64 808 58 816 C88 832 98 872 98 916 C98 948 92 966 86 980 L16 980 C14 962 8 952 0 952 C-8 952 -14 962 -16 980 L-86 980 C-92 966 -98 948 -98 916 C-98 872 -88 832 -58 816 C-64 808 -70 798 -70 778 C-70 736 -46 702 0 702 Z" />
+      <path d="M62 826 C90 848 99 880 96 918 C94 946 90 962 84 972 L50 972 C70 936 76 884 62 826 Z" fill="#DDE6FB" />
+      <path stroke="#B9C7EF" stroke-width="5" fill="none" d="M-54 872 l7 12 l7 -11 M-20 894 l7 12 l7 -11 M16 874 l7 12 l7 -11 M-66 922 l7 12 l7 -11 M-30 938 l7 12 l7 -11 M8 922 l7 12 l7 -11 M44 906 l7 12 l7 -11 M46 946 l7 12 l7 -11" />
+      <g ${BLUE}><ellipse cx="-70" cy="782" rx="12" ry="17" /><ellipse cx="70" cy="782" rx="12" ry="17" /></g>
+      ${scarf ? SCARF : ""}
+      <path d="M0 746 C20 732 56 738 56 776 C58 822 34 848 0 848 C-34 848 -58 822 -56 776 C-56 738 -20 732 0 746 Z" ${BLUE} />
+      <path d="M0 792 C26 790 42 804 40 820 C38 838 20 843 0 843 C-20 843 -38 838 -40 820 C-42 804 -26 790 0 792 Z" fill="#8DB4EC" />
+      <circle cx="-23" cy="775" r="14" fill="#FFF" /><circle cx="23" cy="775" r="14" fill="#FFF" />
+      <circle cx="-20" cy="777" r="8" fill="#121111" /><circle cx="20" cy="777" r="8" fill="#121111" />
+      <circle cx="-23" cy="773" r="3" fill="#FFF" /><circle cx="17" cy="773" r="3" fill="#FFF" />
+      <path stroke="#34549A" stroke-width="6" fill="none" d="M-38 757 C-30 750 -18 750 -11 756 M38 757 C30 750 18 750 11 756" />
+      <ellipse cx="-6" cy="801" rx="3.5" ry="4.5" fill="#34549A" /><ellipse cx="6" cy="801" rx="3.5" ry="4.5" fill="#34549A" />
+      <path d="M-25 814 C-12 820 12 820 25 814 C23 832 12 838 0 838 C-12 838 -23 832 -25 814 Z" fill="#2B3A66" />
+      <path d="M-19 817 C-8 821 8 821 19 817 L18 823 C8 826 -8 826 -18 823 Z" fill="#FFF" />
+      <path d="M-10 836 C-6 829 6 829 10 836 C4 838 -4 838 -10 836 Z" fill="#EE9ABB" />
+      <ellipse cx="-44" cy="801" rx="9" ry="6" fill="#F0A9C6" opacity="0.85" /><ellipse cx="44" cy="801" rx="9" ry="6" fill="#F0A9C6" opacity="0.85" />
+      ${HATS[hat]}
+      ${held}
+      ${hold ? FRONT.hold : ""}
+    </g>`;
+  }
+
+  // ── Scenery ───────────────────────────────────────────────────────────────
+  const grad = (id, stops, x2 = 0, y2 = 1) =>
+    `<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.map(([o, c, a = 1]) => `<stop offset="${o}" stop-color="${c}" stop-opacity="${a}" />`).join("")}</linearGradient>`;
+  const ripples = `<path stroke="#FFF" stroke-linecap="round" stroke-opacity="0.45" stroke-width="6" fill="none" d="M40 1010 H130 M886 1000 H980 M20 1112 H74 M950 1104 H1010 M96 1204 H206 M806 1196 H930 M420 1236 H566 M640 1252 H700" />`;
+  const floe = `<path d="M148 1076 L876 1076 L778 1168 L640 1150 L520 1212 L388 1158 L262 1176 Z" fill="url(#under)" />
+    <path d="M96 1008 L148 1078 L300 1094 L318 1030 Z" fill="#BCC9F0" /><path d="M318 1030 L300 1094 L520 1110 L548 1036 Z" fill="#CFDAF7" />
+    <path d="M548 1036 L520 1110 L738 1096 L742 1026 Z" fill="#B7C5EE" /><path d="M742 1026 L738 1096 L880 1074 L932 1000 Z" fill="#A5B6E9" />
+    <path d="M96 1008 L176 946 L372 924 L604 918 L818 936 L932 1000 L742 1026 L548 1036 L318 1030 Z" fill="#FFF" />
+    <path d="M96 1008 L176 946 L372 924 L318 1030 Z" fill="#F4F7FE" /><path d="M818 936 L932 1000 L742 1026 Z" fill="#EEF2FD" />`;
+  const peaks = (a = "#E6ECFB", b = "#D3DDF6") => `<path d="M0 962 L70 912 L128 930 L196 884 L262 940 L330 962 Z" fill="${a}" /><path d="M1024 962 L1024 906 L952 872 L900 918 L842 902 L770 962 Z" fill="${a}" />
+    <path d="M196 884 L262 940 L330 962 L214 962 Z" fill="${b}" /><path d="M952 872 L1024 906 L1024 962 L936 962 Z" fill="${b}" />`;
+  const gift = (x, y, k, box, lid, side, ribbon) => `<g transform="translate(${x} ${y}) scale(${k}) translate(-204 -1004)">
+    <ellipse cx="204" cy="1006" rx="64" ry="9" fill="#9FB0E4" opacity="0.5" /><path d="M152 936 H256 V1004 H152 Z" fill="${box}" /><path d="M228 936 H256 V1004 H228 Z" fill="${side}" opacity="0.6" />
+    <path d="M144 914 H264 V940 H144 Z" fill="${lid}" /><path d="M194 914 H214 V1004 H194 Z" fill="${ribbon}" />
+    <path d="M204 914 C176 914 154 900 162 884 C172 868 198 886 204 914 C210 886 236 868 246 884 C254 900 232 914 204 914 Z" fill="none" stroke="${ribbon}" stroke-width="11" stroke-linejoin="round" /></g>`;
+  const HEART = "M0 30 C-52 -4 -44 -48 -20 -48 C-8 -48 -2 -40 0 -32 C2 -40 8 -48 20 -48 C44 -48 52 -4 0 30 Z";
+
+  function seeded(seed) {
+    let s = seed;
+    return () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  }
+  /** Kept off the lettering and the figures. */
+  function scatter({ seed, count, blocked, colors, shapes, gap = 46, bottom = 880 }) {
+    const r = seeded(seed), placed = [];
+    let html = "";
+    for (let t = 0; placed.length < count && t < 8000; t++) {
+      const x = r() * 1024, y = r() * bottom;
+      if (blocked.some(([a, b, c, d]) => x > a - 16 && x < c + 16 && y > b - 16 && y < d + 16)) continue;
+      if (placed.some(([a, b]) => Math.hypot(a - x, b - y) < gap)) continue;
+      placed.push([x, y]);
+      const c = colors[Math.floor(r() * colors.length)], z = 0.8 + r() * 0.6, rot = Math.floor(r() * 360);
+      html += shapes[Math.floor(r() * shapes.length)](c, `translate(${x.toFixed(1)} ${y.toFixed(1)})`, rot, z.toFixed(2));
+    }
+    return html;
+  }
+  const S = {
+    strip: (c, t, rot, z) => `<rect x="-6" y="-13" width="12" height="26" rx="3" fill="${c}" transform="${t} rotate(${rot}) scale(${z})" />`,
+    dot: (c, t, rot, z) => `<circle r="8" fill="${c}" transform="${t} scale(${z})" />`,
+    curl: (c, t, rot, z) => `<path d="M-18 0 C-10 -14 -4 14 4 0 C10 -12 14 8 20 -2" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" transform="${t} rotate(${rot}) scale(${z})" />`,
+    flake: (c, t, rot, z) => `<path d="M0 -15 V15 M-13 -7.5 L13 7.5 M-13 7.5 L13 -7.5" stroke="${c}" stroke-width="5" stroke-linecap="round" transform="${t} rotate(${rot}) scale(${z})" />`,
+    heart: (c, t, rot, z) => `<path d="${HEART}" fill="${c}" transform="${t} rotate(${(rot % 50) - 25}) scale(${(z * 0.36).toFixed(2)}) translate(0 8)" />`,
+    star: (c, t, rot, z) => `<path d="M0 -18 L5 -6 L18 -5 L8 4 L11 17 L0 10 L-11 17 L-8 4 L-18 -5 L-5 -6 Z" fill="${c}" transform="${t} rotate(${rot}) scale(${z})" />`,
+    snow: (c, t, rot, z) => `<circle r="5" fill="${c}" opacity="0.9" transform="${t} scale(${z})" />`,
+    twinkle: (c, t, rot, z) => `<path d="M0 -13 C1 -3 3 -1 13 0 C3 1 1 3 0 13 C-1 3 -3 1 -13 0 C-3 -1 -1 -3 0 -13 Z" fill="${c}" transform="${t} scale(${z})" />`,
+  };
+  const words = (lines, fill = "#121111") => lines.map(([t, y]) => `<text class="h" x="512" y="${y}" text-anchor="middle" fill="${fill}">${t}</text>`).join("");
+
+  const CAKE = `<ellipse cx="452" cy="996" rx="246" ry="30" fill="#C9D4F4" opacity="0.75" /><ellipse cx="452" cy="980" rx="236" ry="34" fill="#E9EEFB" /><ellipse cx="452" cy="974" rx="236" ry="32" fill="#FFF" />
+    <path d="M256 838 V958 A196 28 0 0 0 648 958 V838 Z" fill="url(#pink)" /><path d="M256 912 A196 28 0 0 0 648 912 V930 A196 28 0 0 1 256 930 Z" fill="#FBDCE9" />
+    <path d="M256 838 V876 C256 900 286 900 288 876 C290 858 312 862 314 884 C316 918 350 920 352 890 C354 870 376 872 378 886 C380 906 408 908 410 890 C412 874 436 876 438 900 C440 932 476 932 478 900 C480 876 504 874 506 888 C508 904 534 904 536 888 C538 870 560 870 562 892 C564 916 596 914 598 886 C600 862 620 862 622 876 C624 894 648 892 648 870 V838 Z" fill="#FFFDF9" />
+    <ellipse cx="452" cy="838" rx="196" ry="28" fill="#FFF" /><ellipse cx="452" cy="840" rx="150" ry="19" fill="#F6E3EA" />
+    <path d="M328 724 V832 A124 19 0 0 0 576 832 V724 Z" fill="url(#top1)" />
+    <path d="M328 724 V752 C328 772 350 772 352 754 C354 740 372 742 374 762 C376 792 404 792 406 766 C408 750 426 750 428 764 C430 782 452 782 454 764 C456 748 474 750 476 772 C478 798 506 796 508 766 C510 750 526 750 528 760 C530 776 550 774 552 756 C554 742 576 744 576 750 V724 Z" fill="#E281A7" />
+    <ellipse cx="452" cy="724" rx="124" ry="19" fill="#EE9ABB" />
+    <g stroke-width="7" stroke-linecap="round"><path d="M352 812 l10 -8 M548 808 l8 9 M296 936 l9 7 M600 938 l10 4" stroke="#57B2C5" /><path d="M398 826 l12 4 M364 952 l11 -5" stroke="#E281A7" /><path d="M452 814 l4 12 M414 731 l11 3 M528 952 l10 -7" stroke="#F2B84B" /><path d="M500 826 l12 -5 M444 958 l12 3" stroke="#7F93DD" /><path d="M384 722 l12 -3 M498 730 l12 -3" stroke="#FFF" /><path d="M530 721 l10 3" stroke="#C9D4F4" /></g>
+    <rect x="438" y="612" width="28" height="114" rx="6" fill="#FFF" /><clipPath id="cnd"><rect x="438" y="612" width="28" height="114" rx="6" /></clipPath>
+    <path clip-path="url(#cnd)" stroke="#8FA2E4" stroke-width="11" d="M430 652 L474 628 M430 686 L474 662 M430 720 L474 696 M430 754 L474 730" />
+    <path d="M452 612 V594" stroke="#3A3434" stroke-width="5" stroke-linecap="round" />
+    <path d="M452 498 C486 546 490 568 484 582 C478 600 466 606 452 606 C438 606 426 600 420 582 C414 566 424 546 452 498 Z" fill="#FFB347" />
+    <path d="M452 540 C470 566 472 578 468 588 C464 598 460 601 452 601 C444 601 440 598 436 588 C432 578 436 564 452 540 Z" fill="#FFF0C2" />`;
+
+  const TROPHY = `<g transform="translate(130 756)">
+    <path d="M-44 -104 C-82 -104 -80 -54 -38 -50" fill="none" stroke="#D99A2B" stroke-width="10" /><path d="M44 -104 C82 -104 80 -54 38 -50" fill="none" stroke="#D99A2B" stroke-width="10" />
+    <path d="M-48 -120 H48 C50 -70 32 -36 0 -34 C-32 -36 -50 -70 -48 -120 Z" fill="#F7C65B" /><path d="M14 -120 H48 C50 -70 32 -36 8 -34 C22 -60 22 -90 14 -120 Z" fill="#E9AE3C" />
+    <ellipse cx="0" cy="-120" rx="48" ry="9" fill="#FFE19A" /><path d="M-9 -36 H9 V-14 H-9 Z" fill="#D99A2B" /><path d="M-28 -16 H28 L32 4 H-32 Z" fill="#E9AE3C" />
+    <path d="M0 -102 L6 -88 L21 -87 L10 -77 L13 -62 L0 -70 L-13 -62 L-10 -77 L-21 -87 L-6 -88 Z" fill="#FFF6DD" /></g>`;
+
+  const LIGHTS = [[300, 640, "#F7C65B"], [262, 704, "#EE7C9B"], [326, 722, "#7FD1E0"], [238, 786, "#7FD1E0"], [300, 800, "#F7C65B"], [362, 790, "#EE7C9B"], [212, 876, "#EE7C9B"], [270, 888, "#F7C65B"], [334, 892, "#7FD1E0"], [390, 872, "#F7C65B"]];
+  const TREE = `<ellipse cx="300" cy="998" rx="140" ry="18" fill="#9FB0E4" opacity="0.5" /><path d="M278 900 H322 V992 H278 Z" fill="#7A5640" />
+    <path d="M300 556 L372 686 C350 694 332 692 300 688 C268 692 250 694 228 686 Z" fill="#3F9D7C" /><path d="M300 630 L404 776 C372 788 338 784 300 780 C262 784 228 788 196 776 Z" fill="#37906F" /><path d="M300 716 L440 900 C396 918 344 912 300 908 C256 912 204 918 160 900 Z" fill="#2F8263" />
+    <g fill="none" stroke="#FFF" stroke-width="10" stroke-linecap="round" opacity="0.95"><path d="M236 684 C262 690 284 682 300 686 C322 692 344 690 364 684" /><path d="M204 774 C240 784 272 774 300 778 C332 784 366 782 396 774" /><path d="M168 898 C212 910 262 900 300 906 C346 912 396 908 432 898" /></g>
+    ${LIGHTS.map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="22" fill="${c}" opacity="0.28" /><circle cx="${x}" cy="${y}" r="11" fill="${c}" />`).join("")}
+    <circle cx="300" cy="548" r="62" fill="#FFE19A" opacity="0.28" /><path d="M0 -38 L11 -13 L38 -11 L17 7 L24 34 L0 20 L-24 34 L-17 7 L-38 -11 L-11 -13 Z" fill="#F7C65B" transform="translate(300 548)" />`;
+
+  const PALE = ["#FFFFFF", "#C3CEEF"];
+  const CARDS = {
+    birthday: () => ({
+      sky: [[0, "#FBDCE9"], [0.55, "#FDEBF1"], [1, "#FFF3E6"]], sea: [[0, "#C9D4F4"], [1, "#8FA2E4"]],
+      back: peaks() + `<circle cx="452" cy="576" r="290" fill="url(#glow)" />` + scatter({ seed: 41, count: 74, blocked: [[92, 44, 932, 490], [330, 480, 574, 860], [586, 570, 900, 990], [236, 700, 668, 1000]], colors: ["#E281A7", "#8FA2E4", "#57B2C5", "#F2B84B", ...PALE], shapes: [S.strip, S.dot, S.curl, S.flake] }),
+      words: words([["Happy", 216], ["birthday", 426]]),
+      front: CAKE + yeti({ x: 756, hat: "party" }) + gift(184, 1008, 1, "#98A9E6", "#AEBCF0", "#7F93DD", "#E281A7"),
+    }),
+    thanks: () => ({
+      sky: [[0, "#DCE6FB"], [0.55, "#EEF2FD"], [1, "#FDEBF1"]], sea: [[0, "#BFE0EA"], [1, "#7CB9CF"]],
+      back: peaks("#E9F1FB", "#D5E3F6") + `<circle cx="512" cy="820" r="330" fill="url(#rose)" />` + scatter({ seed: 23, count: 62, blocked: [[150, 60, 880, 480], [330, 520, 694, 1000]], colors: ["#E281A7", "#F2A5C1", "#98A9E6", "#57B2C5", ...PALE], shapes: [S.heart, S.heart, S.dot, S.flake] }),
+      words: words([["Thank", 232], ["you", 426]]),
+      front: yeti({ x: 512, y: 1000, k: 1.36, hold: true, held: `<path d="${HEART}" transform="translate(0 914) scale(1.5)" fill="#E65C86" stroke="#B93B66" stroke-width="3" /><path d="M-38 872 C-50 872 -56 884 -54 896" stroke="#F9BDD0" stroke-width="8" fill="none" />` }),
+    }),
+    congrats: () => ({
+      sky: [[0, "#FFF0C9"], [0.55, "#FFF7E6"], [1, "#E5F6EF"]], sea: [[0, "#BFE6DC"], [1, "#74BFB4"]],
+      back: peaks("#E6F3F2", "#CFE6E4") + `<circle cx="512" cy="780" r="400" fill="url(#glow)" />` + scatter({ seed: 77, count: 96, blocked: [[96, 130, 930, 370], [290, 480, 780, 1000]], colors: ["#F2B84B", "#E281A7", "#57B2C5", "#8FA2E4", "#5DB58F"], shapes: [S.strip, S.strip, S.curl, S.star, S.dot] }),
+      words: words([["Congrats", 316]]),
+      front: `<path d="M352 966 L392 936 H632 L672 966 Z" fill="#F4F7FE" /><path d="M352 966 H672 V1014 H352 Z" fill="#CFDAF7" /><path d="M560 966 H672 V1014 H560 Z" fill="#B7C5EE" />` + yeti({ x: 512, y: 954, k: 1.3, left: ARMS.wave, right: `<g>${TROPHY}</g>` + mirror(ARMS.fist) }),
+    }),
+    holidays: () => ({
+      sky: [[0, "#1A2350"], [0.5, "#2C3C7C"], [1, "#5C74BC"]], sea: [[0, "#4B62AC"], [1, "#263670"]],
+      back: `<path d="M-40 470 C180 380 300 560 520 470 C740 380 860 520 1080 420 L1080 620 C860 700 740 580 520 660 C300 740 180 580 -40 660 Z" fill="url(#aurora)" />` + peaks("#8FA3DA", "#7488C6") + scatter({ seed: 12, count: 130, blocked: [[110, 56, 914, 490]], colors: ["#FFFFFF", "#E4EAFA", "#FFE9B8"], shapes: [S.snow, S.snow, S.snow, S.twinkle], gap: 34, bottom: 950 }),
+      words: words([["Happy", 216], ["holidays", 426]], "#FFFFFF"),
+      front: TREE + gift(444, 1012, 0.82, "#D9485F", "#E66478", "#B93550", "#FFF3E6") + gift(176, 1010, 0.62, "#57B2C5", "#7FCBDA", "#3F9DB2", "#FFF3E6") + yeti({ x: 698, y: 1004, k: 1.18, hat: "knit", scarf: true, left: ARMS.wave }),
+    }),
+  };
+
+  const c = CARDS[name]();
+  document.getElementById("root").innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1280" viewBox="0 0 1024 1280">
+    <defs>${grad("sky", c.sky)}${grad("sea", c.sea)}${grad("top1", [[0, "#FFFDF9"], [1, "#F3E6DD"]], 1, 0)}${grad("pink", [[0, "#EE9ABB"], [1, "#D9719B"]], 1, 0)}${grad("under", [[0, "#DCE5FB", 0.95], [1, "#A9B9EE", 0]])}
+      ${grad("aurora", [[0, "#7BE3C0", 0], [0.45, "#7BE3C0", 0.5], [1, "#7FB7F0", 0]])}
+      <radialGradient id="glow"><stop offset="0" stop-color="#FFD98A" stop-opacity="0.95" /><stop offset="0.35" stop-color="#FFDFA6" stop-opacity="0.5" /><stop offset="1" stop-color="#FFE9C9" stop-opacity="0" /></radialGradient>
+      <radialGradient id="rose"><stop offset="0" stop-color="#FBCADB" stop-opacity="0.9" /><stop offset="1" stop-color="#FBCADB" stop-opacity="0" /></radialGradient></defs>
+    <rect width="1024" height="1280" fill="url(#sky)" />${c.back}${c.words}<rect y="960" width="1024" height="320" fill="url(#sea)" />${ripples}${floe}${c.front}</svg>`;
+
+  // Shaggy edges: tufts that point outwards and a little down
+  const fr = seeded(7);
+  for (const p of document.querySelectorAll(".fur")) {
+    const len = p.getTotalLength(), n = Math.round(len / 15);
+    let d = "";
+    for (let i = 0; i < n; i++) {
+      const P = p.getPointAtLength((i / n) * len), M = p.getPointAtLength(((i + 0.5) / n) * len), T = p.getPointAtLength(((i + 1) / n) * len);
+      const dx = T.x - P.x, dy = T.y - P.y, l = Math.hypot(dx, dy) || 1, h = 6 + fr() * 5;
+      const X = M.x + (dy / l) * h, Y = M.y - (dx / l) * h + 4;
+      d += (i ? "" : `M${P.x} ${P.y}`) + ` Q${(P.x + X) / 2 + (dy / l) * 2} ${(P.y + Y) / 2} ${X} ${Y} Q${(X + T.x) / 2} ${(Y + T.y) / 2} ${T.x} ${T.y}`;
+    }
+    p.setAttribute("d", d + "Z");
+    p.setAttribute("fill", "#FFFFFF");
+    p.setAttribute("stroke", "#6F86CF");
+    p.setAttribute("stroke-width", "4");
+  }
+</script>
+</body>
+</html>

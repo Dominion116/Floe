@@ -33,7 +33,7 @@ export const architecture: DocPage = {
               ["/api/claim", "Checking a signed claim and asking Enoki to pay its gas", "The key or note"],
               ["/api/prices", "Live SUI and $LOFI prices", "Anything about a payment"],
               ["/api/impact", "Water totals, read from public claims", "The key or note"],
-              ["Walrus", "Encrypted photo and voice gifts", "The key that opens them"],
+              ["Walrus", "Encrypted cards, photos and voice notes", "The key that opens them"],
               ["Enoki", "Google zkLogin accounts and gas sponsorship", "The link’s private key"],
               ["Sui nodes", "Current objects over gRPC, and past events over GraphQL", "The key or note"],
             ]}

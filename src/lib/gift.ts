@@ -6,7 +6,13 @@ export type GiftMime = "image/jpeg" | "audio/mp4" | "audio/webm";
 export interface Gift {
   mime: GiftMime;
   bytes: Uint8Array<ArrayBuffer>;
+  /** Describes a ready-made card. Only for the sender's screen, and never sealed. */
+  cardAlt?: string;
 }
+
+/** What to call it in a sentence. */
+export const giftNoun = (gift: Gift) =>
+  gift.cardAlt ? "yeti card" : gift.mime === "image/jpeg" ? "photo" : "voice note";
 
 /** Position is the type byte. Append only. */
 const MIMES: GiftMime[] = ["image/jpeg", "audio/mp4", "audio/webm"];

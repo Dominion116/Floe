@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { ImagePlus, Loader2, Mic, Square, Trash2 } from "lucide-react";
 import { GiftMedia } from "@/components/ui/GiftMedia";
-import type { Gift } from "@/lib/gift";
+import { giftNoun, type Gift } from "@/lib/gift";
 import {
   MAX_VOICE_SECONDS,
   MediaError,
@@ -13,11 +13,12 @@ import {
   preparePhoto,
   prepareVoice,
 } from "@/lib/media";
+import { YETI_CARDS, cardThumb, loadCard, type YetiCard } from "@/lib/yetiCards";
 
 interface GiftInputProps {
   gift: Gift | null;
   onChange: (gift: Gift | null) => void;
-  /** True while a photo is being prepared or the microphone is on. */
+  /** True while a card or photo is being prepared or the microphone is on. */
   onBusyChange: (busy: boolean) => void;
 }
 
@@ -57,6 +58,19 @@ export function GiftInput({ gift, onChange, onBusyChange }: GiftInputProps) {
       onBusyChange(false);
     };
   }, [onBusyChange]);
+
+  const handleCard = async (card: YetiCard) => {
+    setError(null);
+    move("working");
+    try {
+      const gift = await loadCard(card);
+      if (mounted.current) onChange(gift);
+    } catch {
+      setError("That card couldn’t be loaded. Check your connection, then try again.");
+    } finally {
+      if (mounted.current) move("idle");
+    }
+  };
 
   const handlePhoto = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -137,15 +151,15 @@ export function GiftInput({ gift, onChange, onBusyChange }: GiftInputProps) {
   return (
     <div role="group" aria-labelledby="gift-label">
       <p id="gift-label" className="type-label mb-2">
-        Photo or voice note <span className="font-normal text-ink-muted">(optional)</span>
+        Card, photo or voice note <span className="font-normal text-ink-muted">(optional)</span>
       </p>
 
       {gift && state === "idle" ? (
         <div className="well space-y-3 p-3">
           <GiftMedia
             gift={gift}
-            alt={gift.mime === "image/jpeg" ? "Your photo" : "Your voice note"}
-            className="max-h-48 w-full rounded-xl object-contain"
+            alt={gift.cardAlt ?? `Your ${giftNoun(gift)}`}
+            className="max-h-64 w-full rounded-xl object-contain"
           />
           <button
             type="button"
@@ -156,7 +170,7 @@ export function GiftInput({ gift, onChange, onBusyChange }: GiftInputProps) {
             className="btn btn-sm btn-ghost w-full"
           >
             <Trash2 aria-hidden="true" />
-            <span>Remove {gift.mime === "image/jpeg" ? "photo" : "voice note"}</span>
+            <span>Remove {giftNoun(gift)}</span>
           </button>
         </div>
       ) : state === "recording" ? (
@@ -179,39 +193,64 @@ export function GiftInput({ gift, onChange, onBusyChange }: GiftInputProps) {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2">
-          <label
-            className={`btn btn-sm btn-secondary cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink ${
-              voiceSupported ? "" : "col-span-2"
-            }`}
-            aria-disabled={state === "working"}
-          >
-            {state === "working" ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <ImagePlus aria-hidden="true" />
-            )}
-            <span>{state === "working" ? "One moment…" : "Add a photo"}</span>
-            <input
-              type="file"
-              accept="image/*"
-              disabled={state === "working"}
-              onChange={(e) => void handlePhoto(e)}
-              className="sr-only"
-            />
-          </label>
-          {voiceSupported && (
-            <button
-              type="button"
-              disabled={state === "working"}
-              onClick={() => void startRecording()}
-              className="btn btn-sm btn-secondary"
+        <>
+          <ul className="mb-3 grid grid-cols-4 gap-2" aria-label="Yeti cards">
+            {YETI_CARDS.map((card) => (
+              <li key={card.id}>
+                <button
+                  type="button"
+                  disabled={state === "working"}
+                  onClick={() => void handleCard(card)}
+                  aria-label={`Add the ${card.name} yeti card`}
+                  className="group block w-full rounded-xl disabled:opacity-50"
+                >
+                  <img
+                    src={cardThumb(card)}
+                    alt=""
+                    width={192}
+                    height={240}
+                    loading="lazy"
+                    className="aspect-[4/5] h-auto w-full rounded-xl border border-mist/70 bg-mist-light object-cover transition-transform duration-150 group-active:scale-[0.97]"
+                  />
+                  <span className="type-help mt-1 block truncate text-center">{card.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="grid grid-cols-2 gap-2">
+            <label
+              className={`btn btn-sm btn-secondary cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink ${
+                voiceSupported ? "" : "col-span-2"
+              }`}
+              aria-disabled={state === "working"}
             >
-              <Mic aria-hidden="true" />
-              <span>Record voice</span>
-            </button>
-          )}
-        </div>
+              {state === "working" ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <ImagePlus aria-hidden="true" />
+              )}
+              <span>{state === "working" ? "One moment…" : "Add a photo"}</span>
+              <input
+                type="file"
+                accept="image/*"
+                disabled={state === "working"}
+                onChange={(e) => void handlePhoto(e)}
+                className="sr-only"
+              />
+            </label>
+            {voiceSupported && (
+              <button
+                type="button"
+                disabled={state === "working"}
+                onClick={() => void startRecording()}
+                className="btn btn-sm btn-secondary"
+              >
+                <Mic aria-hidden="true" />
+                <span>Record voice</span>
+              </button>
+            )}
+          </div>
+        </>
       )}
 
       {error ? (
