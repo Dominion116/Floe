@@ -1,4 +1,7 @@
 # Product Requirements Document (PRD)
+
+> **Original brief.** Kept for history. Where it differs from the code, the code and [the docs](https://floeonsui.vercel.app/docs) are right.
+
 ## Floe — The 2-Second Payment Link on Sui (One-Click Payment Links)
 
 ---

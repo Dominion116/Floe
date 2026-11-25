@@ -32,8 +32,8 @@ export const introduction: DocPage = {
       body: (
         <ol>
           <li>
-            <strong>Create.</strong> The sender picks an amount, an envelope and a note, then signs
-            one transaction. It locks the coins in a new escrow object.
+            <strong>Create.</strong> The sender picks an amount, an envelope and a note, with an
+            optional <A href="/docs/gifts">card, photo or voice note</A>, then signs one transaction. It locks the coins in a new escrow object.
           </li>
           <li>
             <strong>Share.</strong> Floe builds the private link in the sender’s browser. They send
@@ -42,6 +42,10 @@ export const introduction: DocPage = {
           <li>
             <strong>Claim.</strong> The recipient opens the link and logs in. Their browser signs the
             claim with the key in the link, and Floe’s gas sponsor pays the network fee.
+          </li>
+          <li>
+            <strong>Open and move it.</strong> They open the gift, then keep the money, send it on or{" "}
+            <A href="/docs/claim#spend-or-move">withdraw it</A>.
           </li>
           <li>
             <strong>Or refund.</strong> Until the link is claimed, the sender can take the money back
@@ -70,6 +74,7 @@ export const introduction: DocPage = {
             ],
             ["Tokens", "SUI. $LOFI is available only when Floe runs on mainnet."],
             ["Link lifetime", "14 days"],
+            ["Gifts", "One yeti card, photo or voice note for each link, encrypted and stored on Walrus"],
             ["Floe fee", "None. The contract takes no cut."],
             ["Gas", "The sender pays to create or refund. Floe sponsors the claim."],
             ["Who can claim", "The first person to use the full link, before it expires"],

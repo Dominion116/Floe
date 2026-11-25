@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { StepsSection } from "@/components/landing/StepsSection";
+import { GiftsSection } from "@/components/landing/GiftsSection";
 import { LiveDemoSection } from "@/components/landing/LiveDemoSection";
 import { WaterImpactSection } from "@/components/landing/WaterImpactSection";
 import { FaqSection } from "@/components/landing/FaqSection";
@@ -15,6 +16,7 @@ export default function HomePage() {
       <main id="main" tabIndex={-1} className="flex-1">
         <HeroSection />
         <StepsSection />
+        <GiftsSection />
         <LiveDemoSection />
         <WaterImpactSection />
         <FaqSection />

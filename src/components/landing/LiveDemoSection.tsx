@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Gift } from "lucide-react";
 import { ClaimProgress } from "@/components/claim/ClaimProgress";
 import { EnvelopeCard } from "@/components/claim/EnvelopeCard";
 import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
@@ -15,6 +15,8 @@ export function LiveDemoSection() {
   const [claimState, setClaimState] = useState<
     "idle" | "authenticating" | "verifying" | "claiming" | "success"
   >("idle");
+
+  const [giftOpen, setGiftOpen] = useState(false);
 
   const runSimulation = () => {
     setClaimState("authenticating");
@@ -32,13 +34,14 @@ export function LiveDemoSection() {
 
   const resetDemo = () => {
     setClaimState("idle");
+    setGiftOpen(false);
   };
 
   const isProcessing =
     claimState === "authenticating" || claimState === "verifying" || claimState === "claiming";
 
   return (
-    <section id="demo" aria-labelledby="demo-heading" className="section-padding bg-white">
+    <section id="demo" aria-labelledby="demo-heading" className="section-padding bg-snow">
       <div className="container-standard grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         <Reveal>
           <h2 id="demo-heading" className="type-headline">
@@ -53,7 +56,7 @@ export function LiveDemoSection() {
         <Reveal delay={0.06} className="mx-auto w-full max-w-md lg:mr-0">
           <div
             aria-live="polite"
-            className="flex min-h-[27rem] flex-col justify-center rounded-4xl bg-snow p-4 sm:p-6"
+            className="flex min-h-[27rem] flex-col justify-center rounded-4xl border border-mist/70 bg-white p-4 sm:p-6"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -71,6 +74,7 @@ export function LiveDemoSection() {
                       recipientNote="Breakfast coffee is on me."
                       themeId="glacial"
                       hasWaterDonation
+                      hasGift
                     />
                     <button
                       type="button"
@@ -95,8 +99,28 @@ export function LiveDemoSection() {
                         That’s the whole claim. One tap, no wallet.
                       </p>
                     </div>
+                    {giftOpen ? (
+                      <motion.img
+                        src="/cards/thanks-preview.webp"
+                        alt="Thank you, with a yeti holding a heart"
+                        width={560}
+                        height={700}
+                        initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        className="mx-auto aspect-[4/5] h-auto w-full max-w-[16rem] rounded-2xl object-cover"
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setGiftOpen(true)}
+                        className="btn w-full bg-frost text-ink hover:bg-frost-dark"
+                      >
+                        <Gift aria-hidden="true" />
+                        <span>Open your gift</span>
+                      </button>
+                    )}
                     <DetailList
-                      className="bg-white"
                       items={[
                         { label: "Amount", value: "$5.00" },
                         { label: "Gas paid", value: "$0.00" },

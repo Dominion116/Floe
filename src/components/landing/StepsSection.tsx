@@ -28,7 +28,7 @@ function ShareMoment() {
       </p>
       <div className="self-end rounded-2xl rounded-br-md bg-frost px-4 py-2.5 text-sm">
         <p>I sent you $20.00 with Floe.</p>
-        <p className="mt-0.5 font-mono text-[13px] text-ink/75">floe.app/claim</p>
+        <p className="mt-0.5 font-mono text-[13px] text-ink/75">floeonsui.vercel.app</p>
       </div>
     </div>
   );
@@ -52,17 +52,17 @@ function ClaimMoment() {
 const STEPS = [
   {
     title: "Create",
-    body: "Pick an amount and get a private link.",
+    body: "Pick an amount, add a note or a yeti card, and get a private link.",
     moment: <CreateMoment />,
   },
   {
     title: "Share",
-    body: "Send it on WhatsApp, Telegram, or iMessage.",
+    body: "Send it on WhatsApp, Telegram or iMessage, or show a QR code.",
     moment: <ShareMoment />,
   },
   {
     title: "Claim",
-    body: "Your friend logs in with Google. Done.",
+    body: "Your friend logs in with Google, and opens what you put inside.",
     moment: <ClaimMoment />,
   },
 ];

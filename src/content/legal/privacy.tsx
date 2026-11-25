@@ -36,7 +36,7 @@ export const privacy: LegalDoc = {
       title: "What we don’t collect",
       body: (
         <ul>
-          <li>The private key in a payment link, the note beside it, or a photo or voice gift</li>
+          <li>The private key in a payment link, the note beside it, or what’s inside a gift</li>
           <li>Your Google email, name, photo, contacts or password</li>
           <li>Seed phrases, or the keys of your wallet</li>
           <li>Analytics, advertising identifiers or cross-site tracking</li>
@@ -180,7 +180,7 @@ export const privacy: LegalDoc = {
               ],
               [
                 "Walrus publishers and aggregators",
-                "You add or open a photo or voice gift",
+                "You add or open a card, photo or voice note",
                 "The encrypted gift, which they can’t open, and its ID",
               ],
               [
@@ -195,7 +195,7 @@ export const privacy: LegalDoc = {
     },
     {
       id: "gifts",
-      title: "Photo and voice gifts",
+      title: "Cards, photos and voice notes",
       body: (
         <>
           <p>

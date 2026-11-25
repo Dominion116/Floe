@@ -1,5 +1,7 @@
 # Project: Floe — 2-Second Crypto Payment Links on Sui
 
+> **Original brief.** Kept for history. Where it differs from the code, the code and [the docs](https://floeonsui.vercel.app/docs) are right.
+
 Act as a senior full-stack developer, UI/UX designer, and Web3 product strategist. Build **Floe**, a consumer-grade payment link application powered by the Sui Network. Floe lets a sender generate a shareable payment link in seconds. The recipient — who has never touched crypto — clicks the link, taps "Continue with Google", and the money lands in their account in under 2 seconds with zero gas fees and zero wallet setup required.
 
 The product is built for the Lofi the Yeti hackathon and must be polished enough to demo live to judges on day one.

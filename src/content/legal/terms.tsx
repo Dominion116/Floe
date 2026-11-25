@@ -110,7 +110,7 @@ export const terms: LegalDoc = {
     },
     {
       id: "gifts",
-      title: "Photo and voice gifts",
+      title: "Cards, photos and voice notes",
       body: (
         <>
           <p>

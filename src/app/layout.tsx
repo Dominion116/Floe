@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Floe: send money with a link",
   description:
-    "Send money with a link. No wallet needed. They click, log in with Google, and the money is theirs.",
+    "Send money with a link, with a yeti card, photo or voice note inside. They click, log in with Google, and the money is theirs. No wallet needed.",
   // Each page's own title and description fill in the rest.
   openGraph: { type: "website", siteName: "Floe" },
   twitter: { card: "summary_large_image" },

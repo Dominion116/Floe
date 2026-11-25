@@ -9,7 +9,7 @@ export function WaterImpactSection() {
   const impact = useImpact();
 
   return (
-    <section aria-labelledby="water-impact-heading" className="section-padding bg-snow">
+    <section aria-labelledby="water-impact-heading" className="section-padding bg-white">
       <div className="container-standard">
         <Reveal className="grid gap-10 rounded-4xl bg-frost-light p-6 sm:p-10 lg:grid-cols-12 lg:gap-8 lg:p-16">
           <div className="lg:col-span-7">

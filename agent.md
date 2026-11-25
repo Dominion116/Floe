@@ -8,13 +8,15 @@ You are building **Floe**, a consumer-grade crypto payment link app on the Sui N
 
 Floe lets a sender generate a shareable payment link in 5 seconds. The recipient — who has never heard of crypto — clicks it, taps "Continue with Google", and the money lands in their account in under 2 seconds with zero gas fees and zero wallet setup.
 
-The product has four surfaces:
+The product is live on testnet and has these surfaces:
 
 | Surface | Description |
 |---|---|
 | **Landing Page** | Public marketing page. Hero, 3-step explainer, interactive demo, FAQ. |
 | **Sender Experience** | Keypad → amount → theme → note → share modal with QR + deep links. |
-| **Recipient Claim** | Envelope reveal → Google/Apple login → confetti unboxing → balance view. |
+| **Recipient Claim** | Envelope → Google login or Sui wallet → confetti → gift reveal → account. |
+| **Account** | Balance, address and withdrawals at `/account`. |
+| **Docs and legal** | `/docs`, `/privacy` and `/terms`, from `src/content`. |
 | **Sender Dashboard** | History feed of links with Pending / Claimed / Expired status + clawback. |
 
 Build in that order. Do not skip ahead to smart contract wiring until all four UI surfaces are complete and visually polished.
@@ -54,7 +56,7 @@ SENDER
   1. Selects amount ($10 / SUI / $LOFI) + note + optional water roundup
   2. Client generates ephemeral keypair (ephem_sk, ephem_pk) in memory
   3. Signs PTB: deposits Coin into PaymentEscrow locked to ephem_pk
-  4. Builds link: https://floe.app/claim?id=<EscrowID>#<ephem_sk>
+  4. Builds link: https://floeonsui.vercel.app/claim?id=<EscrowID>#k=<ephem_sk>&n=<note>&g=<gift blob ID>
   5. Shares via WhatsApp / iMessage / QR
 
 RECIPIENT
@@ -62,7 +64,7 @@ RECIPIENT
   2. Client extracts EscrowID from ?id= and ephem_sk from window.location.hash
   3. Clicks "Continue with Google" → zkLogin OAuth
   4. App derives deterministic Sui zkLogin address
-  5. Builds Claim PTB signed by ephem_sk, gas 100% sponsored by Enoki
+  5. ephem_sk signs escrow ID + recipient; the Claim PTB is sponsored by Enoki
   6. Consensus settles in ~400 ms → funds transferred
   7. Unboxing animation fires
 ```
@@ -77,7 +79,7 @@ The Move 2024 module lives at `move/sources/escrow.move`.
 
 **Struct:**
 ```move
-public struct PaymentEscrow<phantom T> has key, store {
+public struct PaymentEscrow<phantom T> has key {
     id: UID,
     balance: Balance<T>,
     sender: address,
@@ -91,7 +93,7 @@ public struct PaymentEscrow<phantom T> has key, store {
 **Entry functions:**
 - `create_escrow<T>` — splits coin, shares the escrow object, emits `EscrowCreated`
 - `claim_escrow<T>` — verifies ephem signature, transfers funds, routes water donation, emits `EscrowClaimed`
-- `reclaim_escrow<T>` — sender clawback after expiry, emits `EscrowReclaimed`
+- `reclaim_escrow<T>` — sender refund at any time until claimed, emits `EscrowReclaimed`
 
 ---
 
@@ -139,7 +141,7 @@ Phase 7  │ Testnet deploy + video + submission package
 - **CTA:** *"Create a payment link"*
 - **Step 1:** Create — Pick an amount and get a private link.
 - **Step 2:** Share — Send it on WhatsApp, Telegram, or iMessage.
-- **Step 3:** Claim — Your friend logs in with Google or Apple. Done.
+- **Step 3:** Claim — Your friend logs in with Google, and opens what you put inside.
 - **Water roundup toggle:** *"💧 Round up to donate 10¢ to clean ocean water"*
 - **Claim progress states:** *Authenticating… → Verifying… → Claiming…*
 

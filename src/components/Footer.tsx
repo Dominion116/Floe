@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { CreateLinkButton } from "@/components/create/CreateLinkProvider";
-import { CONTACT_EMAIL, ISSUES_URL } from "@/lib/site";
+import { CONTACT_EMAIL, ISSUES_URL, REPO_URL } from "@/lib/site";
 
 const linkClass =
   "inline-flex min-h-[44px] md:min-h-[32px] items-center rounded-sm text-sm text-ink-muted hover:text-ink transition-colors duration-150";
 
 const PRODUCT_LINKS = [
+  { href: "/#gifts", label: "Cards and gifts" },
   { href: "/#demo", label: "Claim demo" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/account", label: "Your account" },
@@ -21,10 +22,12 @@ const RESOURCE_LINKS = [
 const ECOSYSTEM_LINKS = [
   { href: "https://hackathon.lofitheyeti.com/", label: "Lofi the Yeti hackathon" },
   { href: "https://sui.io", label: "Sui Network" },
+  { href: "https://www.walrus.xyz", label: "Walrus" },
   {
     href: "https://docs.sui.io/guides/developer/cryptography/zklogin",
     label: "Sui zkLogin docs",
   },
+  { href: REPO_URL, label: "Source code" },
 ];
 
 export function Footer() {

@@ -152,8 +152,8 @@ const LINK_PARTS = [
     className: "bg-theme-water",
   },
   {
-    text: "#k=suiprivkey1…&n=Thanks+for+lunch!",
-    label: "Key and note",
+    text: "#k=suiprivkey1…&n=Thanks+for+lunch!&g=B1IBpai6…",
+    label: "Key, note and gift ID",
     seen: "Read by the browser. Not sent to Floe’s server.",
     className: "bg-frost",
   },

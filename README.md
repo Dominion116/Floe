@@ -1,4 +1,4 @@
-# Floe — The 2-Second Payment Link on Sui
+# Floe: send money with a link, on Sui
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-floeonsui.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://floeonsui.vercel.app)
 [![Sui Network](https://img.shields.io/badge/Blockchain-Sui_Network-4C72B0?style=for-the-badge&logo=sui&logoColor=white)](https://sui.io)
@@ -7,23 +7,28 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Hackathon](https://img.shields.io/badge/Hackathon-Lofi_The_Yeti_CLAY_III-00B4D8?style=for-the-badge)](https://hackathon.lofitheyeti.com/)
 
-> Consumer-grade payment links on Sui. Senders create a link in 5 seconds; recipients tap "Continue with Google" and receive funds in under 2 seconds with zero gas fees and zero wallet setup.
+> Send money with a link, with a yeti card, photo or voice note inside. Recipients tap "Continue with Google" and the money is theirs, with no wallet, seed phrase or gas.
+
+**Live on Sui Testnet:** [floeonsui.vercel.app](https://floeonsui.vercel.app) · [Documentation](https://floeonsui.vercel.app/docs) · Package [`0xf11d…3663`](https://suiscan.xyz/testnet/object/0xf11d258ca429d592d4c22a538e50265c6804cd389716ff5570e2ada002013663)
+
+> Hackathon software. The contract has unit tests but has not been audited.
 
 ---
 
 ## Features
 
 - ✅ **Zero Seed Phrases (zkLogin):** Recipients authenticate via Google OAuth 2.0 without ever generating or securing a 12-to-24 word seed phrase.
-- ✅ **Zero Gas Fees for Receivers:** 100% of claim transactions are gas-sponsored via Enoki and Sui Sponsored Transactions.
-- ✅ **Trustless URL Fragment Cryptography:** Ephemeral Ed25519 private keys are stored strictly in the URL hash fragment (`#`), ensuring keys never touch web servers or analytics CDNs.
-- ✅ **Lofi Clean Ocean Mission:** Built-in "Round up 10¢ to Clean Water" toggle that directs micro-donations directly to the Lofi Foundation Treasury on-chain.
-- ✅ **Sender Safety Timeout & Clawback:** Automated 14-day escrow expiration enabling senders to cancel and refund unclaimed links atomically.
-- ✅ **Consumer Currency Display:** Real-time dual display in fiat USD (`$10.00`) alongside native `SUI` and `$LOFI` token equivalents.
+- ✅ **Zero Gas to Claim:** Claims are sponsored through Enoki, with a Google login or a Sui wallet.
+- ✅ **Trustless URL Fragment Cryptography:** Ephemeral Ed25519 private keys are stored strictly in the URL hash fragment (`#`), which Floe’s server never receives.
+- ✅ **Lofi Clean Ocean Mission:** A 10¢ roundup the contract sends to the Lofi Foundation treasury when a link is claimed. Totals on the site are read from Sui.
+- ✅ **Refunds:** Links expire after 14 days. The sender can refund an unclaimed link at any time, before or after that.
+- ✅ **Consumer Currency Display:** Real-time dual display in fiat USD (`$10.00`) alongside `SUI`, and `$LOFI` on mainnet, at live prices.
 - ✅ **Yeti Cards:** One-tap birthday, thank-you, congrats and holiday cards. Artwork source: `art/yeti-cards.html`.
 - ✅ **Card, Photo & Voice Gifts on Walrus:** Encrypted in the browser with a key derived from the link, stored on Walrus, and opened after the claim.
 - ✅ **Account & Withdraw:** Recipients see their balance and withdraw to any Sui address, with no seed phrase needed.
+- ✅ **In-App Browser Help:** Detects browsers inside chat apps, where Google blocks login, and copies the whole link into a real one.
 - ✅ **Social Share & QR Settlement:** One-tap link sharing for WhatsApp, Telegram, iMessage, and high-contrast dynamic QR codes for in-person payments.
-- 🚧 **Multi-Token Splits & Multi-Claim Pools:** Distribute funds across multiple recipients from a single master link (in development).
+- 💡 **Group Links (planned):** One link that several people can claim.
 
 ---
 
@@ -33,10 +38,10 @@
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                                    SENDER FLOW                                         │
 │                                                                                        │
-│  1. Sender selects $10 (SUI / $LOFI) + custom gift note + water roundup                │
+│  1. Sender picks an amount, note, optional gift and water roundup                      │
 │  2. Client generates Ephemeral Keypair (ephem_sk, ephem_pk) in memory                   │
 │  3. Sender signs PTB: Deposits Coin into shared PaymentEscrow locked to ephem_pk       │
-│  4. Client constructs Link: https://floeonsui.vercel.app/claim?id=<EscrowID>#<ephem_sk>│
+│  4. Client encrypts the gift to Walrus, and builds /claim?id=<EscrowID>#k=…&n=…&g=…    │
 │  5. Sender shares via WhatsApp / iMessage / Telegram / QR Code                         │
 └────────────────────────────────────────┬───────────────────────────────────────────────┘
                                          │
@@ -49,11 +54,11 @@
 │  3. Recipient clicks "Continue with Google" (Sui zkLogin OAuth)                         │
 │  4. App derives Recipient's deterministic Sui zkLogin address                          │
 │  5. Client constructs Claim PTB:                                                       │
-│     - Signs recipient address with ephem_sk                                            │
+│     - Signs the escrow ID and recipient address with ephem_sk                          │
 │     - Destination set to derived zkLogin address                                       │
 │     - Gas 100% sponsored by Enoki Gas Station                                          │
-│  6. Consensus executes in ~400ms: Escrow balance transferred to Recipient              │
-│  7. Unboxing animation triggers: Funds immediately spendable                           │
+│  6. Contract verifies, pays the recipient and treasury, and deletes the escrow         │
+│  7. Recipient opens the gift, then keeps, sends on or withdraws the money              │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -65,8 +70,8 @@ Get the Floe web application up and running locally in three commands:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-username/floe.git
-cd floe
+git clone https://github.com/Dominion116/Floe.git
+cd Floe
 
 # 2. Install dependencies (npm strictly required)
 npm install
@@ -91,8 +96,8 @@ Visit [http://localhost:3000](http://localhost:3000) to view the application.
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/floe.git
-   cd floe
+   git clone https://github.com/Dominion116/Floe.git
+   cd Floe
    ```
 
 2. **Install project dependencies:**
@@ -254,8 +259,8 @@ public fun reclaim_escrow<T>(
 | Function | Parameters | Return Type | Description |
 |----------|------------|-------------|-------------|
 | `generateEphemeralKeypair()` | `none` | `EphemeralKeys` | Generates a fresh Ed25519 keypair in memory. Returns `privateKey` and `publicKeyHex`. |
-| `buildClaimUrl()` | `baseUrl, escrowId, privateKey, note?` | `string` | Builds the claim link with the key and note strictly in the hash fragment (`#`). |
-| `parseClaimFragment()` | `hash: string` | `{ privateKey, note }` | Reads the key and note from `window.location.hash` in the browser. |
+| `buildClaimUrl()` | `baseUrl, escrowId, privateKey, note?, giftId?` | `string` | Builds the claim link with the key, note and gift ID strictly in the hash fragment (`#`). |
+| `parseClaimFragment()` | `hash: string` | `{ privateKey, note, giftId }` | Reads the key, note and gift ID from `window.location.hash` in the browser. |
 
 ---
 
@@ -300,11 +305,10 @@ sui move test
 ```bash
 cd move
 sui client switch --env testnet
-sui client faucet
 sui client publish
 ```
 
-Copy the published package ID into `NEXT_PUBLIC_FLOE_PACKAGE_ID`. Then, in the
+Fund the account at [faucet.sui.io](https://faucet.sui.io) first. Copy the published package ID into `NEXT_PUBLIC_FLOE_PACKAGE_ID`. Then, in the
 [Enoki Portal](https://enoki.mystenlabs.com):
 
 1. Add your Google OAuth client ID.
@@ -322,7 +326,7 @@ authorized redirect URIs.
 
 #### 1. "Fragment missing or null" when opening claim link
 - **Cause:** Some link shorteners or messaging apps drop URL hash fragments (`#...`) during HTTP 301/302 redirects.
-- **Solution:** Send direct unshortened links (`https://floeonsui.vercel.app/claim?id=...#...`) or use the in-app QR code scanner.
+- **Solution:** Send direct unshortened links (`https://floeonsui.vercel.app/claim?id=...#...`) or scan the QR code with a phone camera.
 
 #### 2. zkLogin "Redirect URI Mismatch" (Error 400)
 - **Cause:** This site's `/auth` page is not registered as a redirect URI in Google Cloud Console.
@@ -330,10 +334,7 @@ authorized redirect URIs.
 
 #### 3. Sponsored Gas "Insufficient Sponsor Balance"
 - **Cause:** The Enoki sponsor gas pool is out of gas tokens on testnet.
-- **Solution:** Fund your sponsor wallet via the Sui Testnet Discord faucet:
-  ```bash
-  curl -X POST https://faucet.testnet.sui.io/v1/gas -H "Content-Type: application/json" -d '{"FixedAmountRequest":{"recipient":"YOUR_ENOKI_SPONSOR_ADDRESS"}}'
-  ```
+- **Solution:** Check the gas budget for testnet in the [Enoki Portal](https://enoki.mystenlabs.com). Claims fail safely, so the money stays in its escrow.
 
 ---
 
